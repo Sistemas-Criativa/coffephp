@@ -46,7 +46,7 @@ class Request {
     /**
      * Insere os valuees no get
      */
-    public final static function gets(string $request){
+    public final static function query(string $request){
         $params = explode("&",substr($request,strpos($request,"?")+1));
         foreach($params as $item){
             $valuees = explode("=",$item);
@@ -93,7 +93,7 @@ class Request {
             }
             return $temp;
         } else {
-            return $_GET;
+            return $_POST;
         }
     }
 

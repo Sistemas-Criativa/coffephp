@@ -14,6 +14,7 @@ class Model extends Config
     protected $hidden = [];
     protected static $query;
     private static $stm;
+    private static $where = false;
     private static $bindParams = array();
 
     /* define the table name with base classe if table is not specified*/
@@ -104,18 +105,18 @@ class Model extends Config
     /** execute an update */
     final public static function update($data, $table = null)
     {
-        self::$bindParams = $data;
+        self::$bindParams = self::verifyFillables($data);
         self::$fill = (new static)->fillables;
-        self::$query = "UPDATE " . ($table != null ? $table : self::tableName()) . ' SET ' . self::prepareBind($data);
+        self::$query = "UPDATE " . ($table != null ? $table : self::tableName()) . ' SET ' . self::prepareBind(self::$bindParams);
         return (new static);
     }
 
     /** execute a insert */
     final public static function insert(array $data, $table = null)
     {
-        self::$bindParams = $data;
+        self::$bindParams = self::verifyFillables($data);
         self::$fill = (new static)->fillables;
-        $fields = self::splitFields($data);
+        $fields = self::splitFields(self::$bindParams);
         self::$query = "INSERT INTO " . ($table != null ? $table : self::tableName()) . " (" . $fields['fields'] . ') VALUES( ' . self::prepareBind($fields['values'], true) . ')';
         return (new static);
     }
@@ -201,50 +202,63 @@ class Model extends Config
     /** write the query in sql */
     final public static function toSQL()
     {
+        $values = array_values(self::$bindParams);
         if (sizeof(self::$bindParams) > 0) {
-            $values = array_values(self::$bindParams);
             self::$query = str_replace("?", "#%s#", self::$query);
             self::$query = sprintf(self::$query, ...$values);
             self::$query = str_replace("#", "'", self::$query);
-            return sprintf(self::$query, ...$values);
+            return sprintf(self::$query, ... $values);
         }
         return self::$query;
     }
 
     /** add where to query */
-    final public static function where(array $conditions = array())
+    final public static function where($field = '', $operator = '', $value = '')
     {
         //add the condition
-        if (sizeof($conditions) == 3) {
-            self::$query .= ' WHERE ' . $conditions[0] . ' ' . $conditions[1] . ' ' . "'" . $conditions[2] . "'";
+        if(empty($field) || empty($operator) || empty($value)) {
+            self::$query .= (self::$where == false ? ' WHERE ' : '');
         } else {
-            self::$query .= ' WHERE ';
+            self::$bindParams[$field] = $value;
+            self::$query .= (self::$where == false ? ' WHERE ' : '') . $field . ' ' . $operator . ' ' .self::prepareBind([$field],true);
+           // self::$query .= ' WHERE ' . $field . ' ' . $operator . ' ' . "'" . $value . "'";
+        }
+        if(self::$where == false) {
+            self::$where = true;
         }
         return (new static);
     }
 
-    /** add and clause */
-    final public static function and(array $conditions)
+    /** add and to query */
+    final public static function and($field = '', $operator = '', $value = '')
     {
         //add the condition
-        if (sizeof($conditions) == 3) {
-            self::$query .= ' AND ' . $conditions[0] . ' ' . $conditions[1] . ' '  . "'" .  $conditions[2]  . "'";
+        if(empty($field) || empty($operator) || empty($value)) {
+            self::$query .= ' AND ';
+        } else {
+            self::$bindParams[$field] = $value;
+            self::$query .= ' AND ' . $field . ' ' . $operator . ' ' .self::prepareBind([$field],true);
         }
         return (new static);
     }
 
-    /** add or clause */
-    final public static function or(array $conditions)
+    /** add or to query */
+    final public static function or($field = '', $operator = '', $value = '')
     {
-         //add the condition
-        if (sizeof($conditions) == 3) {
-            self::$query .= ' OR ' . $conditions[0] . ' ' . $conditions[1] . ' '  . "'" .  $conditions[2]  . "'";
+        //add the condition
+        if(empty($field) || empty($operator) || empty($value)) {
+            self::$query .= ' OR ';
+        } else {
+            self::$bindParams[$field] = $value;
+            self::$query .= ' OR ' . $field . ' ' . $operator . ' ' .self::prepareBind([$field],true);
         }
         return (new static);
     }
+   
     /** add in to query */
     final public static function in($conditionField)
     {
+        self::$where = false;
         //add the condition
         self::$query .= $conditionField . ' IN(';
         return (new static);
@@ -302,10 +316,9 @@ class Model extends Config
     }
 
     /** add the pre to a sql query */
-    public static function pre()
+    public static function toRAW()
     {
-        self::$query = '<pre>' . self::$query . '</pre>';
-        return (new static);
+        return  self::$query;
     }
 
     /** executa a raw query*/

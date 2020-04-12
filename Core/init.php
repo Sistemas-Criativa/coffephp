@@ -29,7 +29,7 @@
 	}
 	set_error_handler("ErrorHandler");
 	set_exception_handler('ExceptionHandler'); 
-	require_once("autoload.php");
+	require_once("../autoload.php");
 
 	/**
 	 * debug a variable in a pre element

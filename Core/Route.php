@@ -127,7 +127,7 @@ class Route{
         //get the args
         $request = (string)$_SERVER['REQUEST_URI'];
         if(strpos($_SERVER['REQUEST_URI'],"?")){
-            Request::gets($request);
+            Request::query($request);
             $request = substr($_SERVER['REQUEST_URI'],0,strpos($_SERVER['REQUEST_URI'],"?"));
         }
 

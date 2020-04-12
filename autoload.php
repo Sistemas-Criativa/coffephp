@@ -1,20 +1,18 @@
 <?php
 
 /**
- * Registra a função de autoload
+ * Register de autoload
  */
-spl_autoload_register(function ($classe) {
-	/*Lista os separadores */
-	$separador = array('\\', '/');
+spl_autoload_register(function ($class) {
+	/*List of separators */
+	$separator = array('\\', '/');
 
-	/*troca os separadores*/
-	$arquivo = str_replace($separador, DIRECTORY_SEPARATOR, $classe);
-	
-	/*verifica se o arquivo existe*/
-	if (file_exists($_SERVER['DOCUMENT_ROOT'] . DIRECTORY_SEPARATOR . $arquivo . ".php")) {
-		require_once $_SERVER['DOCUMENT_ROOT'] . DIRECTORY_SEPARATOR . $arquivo . '.php';
+	/*change the separators*/
+	$file = str_replace($separator, DIRECTORY_SEPARATOR, $class);
+	/*verify if file exist*/
+	if (file_exists(__DIR__ . DIRECTORY_SEPARATOR . $file . ".php")) {
+		require_once __DIR__ . DIRECTORY_SEPARATOR . $file . '.php';
 	} else {
-		throw new Exception("Arquivo não encontrado '$classe'",1);  
+		throw new Exception("File not found '$class'",1);  
 	}
 });
-?>

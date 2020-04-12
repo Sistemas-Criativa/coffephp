@@ -30,7 +30,7 @@
             return self::$instance;
         }
 
-        /** get a Conecction*/
+        /** get a Connection*/
         public function Connection(){
             return $this->Connection;
         }
