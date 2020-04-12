@@ -13,6 +13,6 @@ spl_autoload_register(function ($class) {
 	if (file_exists(__DIR__ . DIRECTORY_SEPARATOR . $file . ".php")) {
 		require_once __DIR__ . DIRECTORY_SEPARATOR . $file . '.php';
 	} else {
-		throw new Exception("File not found '$class'",1);  
+		throw new Exception("File not found '$class'", 1);
 	}
 });

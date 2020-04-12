@@ -1,7 +1,11 @@
 <?php
+
 namespace Core;
+
 use Config\Config;
-class Request {
+
+class Request
+{
     private $request = null;
     private $server = null;
     function __construct()
@@ -13,10 +17,10 @@ class Request {
     /**
      * Get a server variable
      */
-    public final function server(string $item = ""){
-        if(!empty($item))
-        {
-            if(isset($this->request[$item])) {
+    public final function server(string $item = "")
+    {
+        if (!empty($item)) {
+            if (isset($this->request[$item])) {
                 return $this->server[$item];
             } else {
                 return null;
@@ -29,10 +33,10 @@ class Request {
     /**
      * get a request value
      */
-    public final function request(string $item = ""){
-        if(!empty($item))
-        {
-            if(isset($this->request[$item])) {
+    public final function request(string $item = "")
+    {
+        if (!empty($item)) {
+            if (isset($this->request[$item])) {
                 return $this->request[$item];
             } else {
                 return null;
@@ -40,36 +44,37 @@ class Request {
         } else {
             return $this->request;
         }
-        
     }
 
     /**
-     * Insere os valuees no get
+     * Insert query params to get
      */
-    public final static function query(string $request){
-        $params = explode("&",substr($request,strpos($request,"?")+1));
-        foreach($params as $item){
-            $valuees = explode("=",$item);
-            $_GET[$valuees[0]] = $valuees[1];
+    public final static function query(string $request) : void
+    {
+        $params = explode("&", substr($request, strpos($request, "?") + 1));
+        foreach ($params as $item) {
+            $values = explode("=", $item);
+            $_GET[$values[0]] = $values[1];
         }
     }
 
     /**
      * retorna o método da requisição
      */
-    public final function method(){
+    public final function method()
+    {
         return $this->server['REQUEST_METHOD'];
     }
 
     /**
      * retorna um ou todos os valuees do get
      */
-    public final function get(array $itens = array()){
-        if(count($itens)>0)
-        {
+    public final function get(array $itens = array())
+    {
+        if (count($itens) > 0) {
             $temp = [];
-            foreach($itens as $item){
-                if(isset($_GET[$item])) {
+            foreach ($itens as $item) {
+                if (isset($_GET[$item])) {
                     $temp[$item] = $_GET[$item];
                 }
             }
@@ -82,12 +87,12 @@ class Request {
     /**
      * Return all or a specific item of post
      */
-    public final function post(array $itens = array()){
-        if(count($itens)>0)
-        {
+    public final function post(array $itens = array())
+    {
+        if (count($itens) > 0) {
             $temp = [];
-            foreach($itens as $item){
-                if(isset($_POST[$item])) {
+            foreach ($itens as $item) {
+                if (isset($_POST[$item])) {
                     $temp[$item] = $_POST[$item];
                 }
             }
@@ -100,33 +105,36 @@ class Request {
     /**
      * Save data in a session
      */
-    public final static function saveSession($value, string $sessionName = ""){
+    public final static function saveSession($value, string $sessionName = "")
+    {
         $_SESSION[(empty($sessionName) ? Config::session() : $sessionName)] = $value;
     }
 
-        /**
+    /**
      * Unset a session
      */
-    public final static function clearSession(string $sessionName = ""){
+    public final static function clearSession(string $sessionName = "")
+    {
         unset($_SESSION[(empty($sessionName) ? Config::session() : $sessionName)]);
     }
 
     /**
      * Destroy the sessions
      */
-    public final static function destroySession(){
+    public final static function destroySession()
+    {
         session_destroy();
     }
 
     /**
      * Get session data
      */
-    public final static function session(string $sessionName = ""){
-        if(isset($_SESSION[(empty($sessionName) ? Config::session() : $sessionName)])){
+    public final static function session(string $sessionName = "")
+    {
+        if (isset($_SESSION[(empty($sessionName) ? Config::session() : $sessionName)])) {
             return $_SESSION[(empty($sessionName) ? Config::session() : $sessionName)];
         } else {
             return false;
         }
     }
 }
-?>

@@ -149,6 +149,7 @@ class Model extends Config
     final public static function execute()
     {
         $connection = (new static)->Instance()->Connection();
+        self::$query = $connection->real_escape_string(self::$query);
         self::$stm = $connection->prepare(self::$query);
         if (self::$stm != false) {
             self::bindParam();
@@ -207,7 +208,7 @@ class Model extends Config
             self::$query = str_replace("?", "#%s#", self::$query);
             self::$query = sprintf(self::$query, ...$values);
             self::$query = str_replace("#", "'", self::$query);
-            return sprintf(self::$query, ... $values);
+            return sprintf(self::$query, ...$values);
         }
         return self::$query;
     }
@@ -216,14 +217,14 @@ class Model extends Config
     final public static function where($field = '', $operator = '', $value = '')
     {
         //add the condition
-        if(empty($field) || empty($operator) || empty($value)) {
+        if (empty($field) || empty($operator) || empty($value)) {
             self::$query .= (self::$where == false ? ' WHERE ' : '');
         } else {
             self::$bindParams[$field] = $value;
-            self::$query .= (self::$where == false ? ' WHERE ' : '') . $field . ' ' . $operator . ' ' .self::prepareBind([$field],true);
-           // self::$query .= ' WHERE ' . $field . ' ' . $operator . ' ' . "'" . $value . "'";
+            self::$query .= (self::$where == false ? ' WHERE ' : '') . $field . ' ' . $operator . ' ' . self::prepareBind([$field], true);
+            // self::$query .= ' WHERE ' . $field . ' ' . $operator . ' ' . "'" . $value . "'";
         }
-        if(self::$where == false) {
+        if (self::$where == false) {
             self::$where = true;
         }
         return (new static);
@@ -233,11 +234,11 @@ class Model extends Config
     final public static function and($field = '', $operator = '', $value = '')
     {
         //add the condition
-        if(empty($field) || empty($operator) || empty($value)) {
+        if (empty($field) || empty($operator) || empty($value)) {
             self::$query .= ' AND ';
         } else {
             self::$bindParams[$field] = $value;
-            self::$query .= ' AND ' . $field . ' ' . $operator . ' ' .self::prepareBind([$field],true);
+            self::$query .= ' AND ' . $field . ' ' . $operator . ' ' . self::prepareBind([$field], true);
         }
         return (new static);
     }
@@ -246,15 +247,15 @@ class Model extends Config
     final public static function or($field = '', $operator = '', $value = '')
     {
         //add the condition
-        if(empty($field) || empty($operator) || empty($value)) {
+        if (empty($field) || empty($operator) || empty($value)) {
             self::$query .= ' OR ';
         } else {
             self::$bindParams[$field] = $value;
-            self::$query .= ' OR ' . $field . ' ' . $operator . ' ' .self::prepareBind([$field],true);
+            self::$query .= ' OR ' . $field . ' ' . $operator . ' ' . self::prepareBind([$field], true);
         }
         return (new static);
     }
-   
+
     /** add in to query */
     final public static function in($conditionField)
     {

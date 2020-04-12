@@ -1,15 +1,19 @@
 <?php
+
 namespace Core;
+
 use Core\Auth;
-class Filter {
+
+class Filter
+{
     //Array of filters and urls in case fails
     public $filters = ['auth' => '/login'];
 
     /**
-     * Função de autenticação de usuário
+     * Verify if user is logged
      */
-    public function auth(){
+    public function auth()
+    {
         return (Auth::user() == false ? false : true);
     }
 }
-?>
