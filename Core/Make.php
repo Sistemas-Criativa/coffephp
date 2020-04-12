@@ -46,7 +46,7 @@ class Make
             if (count($args) == $totalparams) {
                 $classe->$methodName(...$args);
             } else {
-                throw new \Exception("The method '$method' of class '$controller' needs $totalparams args, but just sent " . count($args) . ".");
+                throw new \Exception("The method '$methodName' of class '$controller' needs $totalparams args, but just sent " . count($args) . ".");
             }
         } else {
             throw new \Exception("The class '$controller' don't have a method named '$method'");
