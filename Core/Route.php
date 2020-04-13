@@ -73,7 +73,7 @@ class Route
     /**
      * get a specific route
      */
-    public final static function route(string $name, array $args = [])
+    public final static function route(string $name, bool $fullURL = false,array $args = [])
     {
         $return = "";
         $usedargs = 0;
@@ -102,7 +102,9 @@ class Route
                 }
 
                 //join a Route
-                $return = implode("/", $temp);;
+                $return = implode("/", $temp);
+                if($fullURL)
+                    $return = Request::server('REQUEST_SCHEME') . '://' . Request::server('HTTP_HOST') . $return;
             }
         }
         return $return;

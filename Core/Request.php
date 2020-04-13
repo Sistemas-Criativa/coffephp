@@ -7,26 +7,24 @@ use Config\Config;
 class Request
 {
     private $request = null;
-    private $server = null;
     function __construct()
     {
         $this->request = $_REQUEST;
-        $this->server = $_SERVER;
     }
 
     /**
      * Get a server variable
      */
-    public final function server(string $item = "")
+    public final static function server(string $item = "")
     {
         if (!empty($item)) {
-            if (isset($this->request[$item])) {
-                return $this->server[$item];
+            if (isset($_SERVER[$item])) {
+                return $_SERVER[$item];
             } else {
                 return null;
             }
         } else {
-            return $this->server;
+            return $_SERVER;
         }
     }
 
@@ -61,9 +59,9 @@ class Request
     /**
      * retorna o método da requisição
      */
-    public final function method()
+    public static final function method()
     {
-        return $this->server['REQUEST_METHOD'];
+        return $_SERVER['REQUEST_METHOD'];
     }
 
     /**

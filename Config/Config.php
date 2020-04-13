@@ -4,13 +4,16 @@ namespace Config;
 
 class Config
 {
+    private $option = [
+        "host" => "localhost",
+        "user" => "root",
+        "base" => "",
+        "session" => "coffePHP",
+        "password" => "",
+        "Connection" => null
+    ];
+
     private static $instance = null;
-    /*Variáveis de Conection*/
-    private $host = "localhost";
-    private $user = "root";
-    private $base = "plasma";
-    private static $session = "plasma";
-    private $password = "";
     private $Connection;
 
     /**
@@ -19,7 +22,7 @@ class Config
      * */
     private function __construct()
     {
-        $this->Connection = new \mysqli($this->host, $this->user, $this->password, $this->base);
+        $this->Connection = new \mysqli($this->option['host'], $this->option['user'], $this->option['password'], $this->option['base']);
         $this->Connection->set_charset("UTF8");
         if ($this->Connection->connect_error) {
             exit;
@@ -46,6 +49,21 @@ class Config
      */
     public final static function session()
     {
-        return self::$session;
+        return (new static)->option['session'];
+    }
+
+    /**
+     * Get the config
+     */
+    public final static function config($name = ''){
+        if(empty($name)){
+            return (new static)->option;
+        } else {
+            if(isset((new static)->option[$name])) {
+                return (new static)->option[$name];
+            }
+            return null;
+        }
+        
     }
 }
