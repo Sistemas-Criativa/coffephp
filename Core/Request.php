@@ -136,18 +136,40 @@ class Request
         }
     }
 
-    public final static function redirect(){
-        return (new static);
+    /**
+     * Redirect
+     */
+    public final static function redirect($url = ""){
+        if(empty($url)) {
+            return (new static);
+        } else {
+            self::url($url);
+        }
     }
+
+    /**
+     * Redirect back to origin page
+     */
     public final static function back(array $args = array())
     {
         self::saveSession($args,'data');
         header('location: ' .  Request::server('REQUEST_URI'));
     }
 
+    /**
+     * redirect to a route
+     */
     public final static function route($route, array $args = array())
     {
         self::saveSession($args,'data');
         header('location: ' .  Route::route($route, true, $args));
+    }
+
+    /**
+     * redirect to an url
+     */
+    public final static function url($url)
+    {
+        header('location: ' .  $url);
     }
 }
