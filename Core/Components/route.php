@@ -1,5 +1,9 @@
 <?php
 $Route;
+
+/**
+ * Get a specific route
+ */
 function route($name = '', $fullURL = false,$args = array()){
 	global $Route;
 

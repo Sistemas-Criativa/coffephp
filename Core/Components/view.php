@@ -1,4 +1,10 @@
 <?php
+
+use Core\Request;
+
+/**
+ * Return a view
+ */
 function view(string $View, array $args = array())
 {
 	//get the args
@@ -15,5 +21,5 @@ function view(string $View, array $args = array())
 		throw new \Exception("View '$View' not found");
 	}
 	ob_end_flush();
+	Request::clearSession('data');
 }
-?>
