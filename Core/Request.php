@@ -67,7 +67,7 @@ class Request
     /**
      * retorna um ou todos os valuees do get
      */
-    public final function get(array $itens = array())
+    public final static function get(array $itens = array())
     {
         if (count($itens) > 0) {
             $temp = [];
@@ -85,7 +85,7 @@ class Request
     /**
      * Return all or a specific item of post
      */
-    public final function post(array $itens = array())
+    public final static function post(array $itens = array())
     {
         if (count($itens) > 0) {
             $temp = [];
@@ -134,5 +134,20 @@ class Request
         } else {
             return false;
         }
+    }
+
+    public final static function redirect(){
+        return (new static);
+    }
+    public final static function back(array $args = array())
+    {
+        self::saveSession($args,'data');
+        header('location: ' .  Request::server('REQUEST_URI'));
+    }
+
+    public final static function route($route, array $args = array())
+    {
+        self::saveSession($args,'data');
+        header('location: ' .  Route::route($route, true, $args));
     }
 }

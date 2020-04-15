@@ -2,11 +2,7 @@
 
 use Core\Request;
 
-function redirect($location)
+function redirect()
 {
-    header('location: ' . $location);
-}
-function back()
-{
-    header('location: ' .  Request::server('REQUEST_URI'));
+    return Request::redirect();
 }

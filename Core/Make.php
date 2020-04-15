@@ -49,7 +49,7 @@ class Make
                 throw new \Exception("The method '$methodName' of class '$controller' needs $totalparams args, but just sent " . count($args) . ".");
             }
         } else {
-            throw new \Exception("The class '$controller' don't have a method named '$method'");
+            throw new \Exception("The class '$controller' don't have a method named '$methodName'");
         }
     }
 }
