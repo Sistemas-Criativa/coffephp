@@ -10,7 +10,6 @@ class Model extends Config
     /** Table and fillables fields */
     protected $table = '';
     protected $fillables = [];
-    private static $fill = [];
     protected $hidden = [];
     protected static $query;
     private static $stm;
@@ -106,7 +105,6 @@ class Model extends Config
     final public static function update($data, $table = null)
     {
         self::$bindParams = self::verifyFillables($data);
-        self::$fill = (new static)->fillables;
         self::$query = "UPDATE " . ($table != null ? $table : self::tableName()) . ' SET ' . self::prepareBind(self::$bindParams);
         return (new static);
     }
@@ -115,7 +113,6 @@ class Model extends Config
     final public static function insert(array $data, $table = null)
     {
         self::$bindParams = self::verifyFillables($data);
-        self::$fill = (new static)->fillables;
         $fields = self::splitFields(self::$bindParams);
         self::$query = "INSERT INTO " . ($table != null ? $table : self::tableName()) . " (" . $fields['fields'] . ') VALUES( ' . self::prepareBind($fields['values'], true) . ')';
         return (new static);
@@ -133,10 +130,8 @@ class Model extends Config
         $types = "";
         $itens = [];
         foreach (self::$bindParams as $field => $value) {
-            if (in_array($field, self::$fill)) {
-                $types .= "s";
-                $itens[] = $value;
-            }
+            $types .= "s";
+            $itens[] = $value;
         }
         if (count($itens) > 0)
             self::$stm->bind_param($types, ...$itens);
@@ -151,13 +146,17 @@ class Model extends Config
         $connection = (new static)->Instance()->Connection();
         self::$query = $connection->real_escape_string(self::$query);
         self::$stm = $connection->prepare(self::$query);
+        self::$query = "";
+        self::$where = false;
         if (self::$stm != false) {
             self::bindParam();
+            self::$bindParams = array();
             self::$stm->execute();
             $results = self::$stm->get_result();
+            self::$stm->free_result();
             $temp = [];
             $count = 0;
-            if (!is_bool($results)) {
+            if ($results != false) {
                 while ($row = $results->fetch_assoc()) {
                     foreach ($row as $item => $value) {
                         if (!in_array($item, (new static)->hidden)) {
@@ -166,13 +165,15 @@ class Model extends Config
                     }
                     $count++;
                 }
+                
                 return $temp;
             } else {
                 return $connection;
             }
         } else {
-            return $results;
+            return array();
         }
+        
     }
 
     /**
@@ -205,10 +206,14 @@ class Model extends Config
     {
         $values = array_values(self::$bindParams);
         if (sizeof(self::$bindParams) > 0) {
-            self::$query = str_replace("?", "#%s#", self::$query);
-            self::$query = sprintf(self::$query, ...$values);
-            self::$query = str_replace("#", "'", self::$query);
-            return sprintf(self::$query, ...$values);
+            $query = self::$query;
+            self::$query = "";
+            self::$where = false;
+            self::$bindParams = array();
+            $query = str_replace("?", "#%s#", $query);
+            $query = sprintf($query, ...$values);
+            $query = str_replace("#", "'", $query);
+            return sprintf($query, ...$values);
         }
         return self::$query;
     }
@@ -222,7 +227,6 @@ class Model extends Config
         } else {
             self::$bindParams[$field] = $value;
             self::$query .= (self::$where == false ? ' WHERE ' : '') . $field . ' ' . $operator . ' ' . self::prepareBind([$field], true);
-            // self::$query .= ' WHERE ' . $field . ' ' . $operator . ' ' . "'" . $value . "'";
         }
         if (self::$where == false) {
             self::$where = true;
@@ -319,7 +323,11 @@ class Model extends Config
     /** add the pre to a sql query */
     public static function toRAW()
     {
-        return  self::$query;
+        $query = self::$query;
+        self::$query = "";
+        self::$where = false;
+        self::$bindParams = array();
+        return  $query;
     }
 
     /** executa a raw query*/

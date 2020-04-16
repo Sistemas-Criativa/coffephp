@@ -14,18 +14,18 @@ class Validator
     {
         foreach ($rules as $item => $value) {
             if (is_array($value)) {
-                foreach($value as $rule){
+                foreach ($value as $rule) {
                     $method = explode(":", $rule);
-                    $args = substr($method[0], strpos($method[0],"#")+1);
-                    $methodName = (strpos($method[0],"#")?substr($method[0], 0,strpos($method[0],"#")):$method[0]);
+                    $args = substr($method[0], strpos($method[0], "#") + 1);
+                    $methodName = (strpos($method[0], "#") ? substr($method[0], 0, strpos($method[0], "#")) : $method[0]);
                     if (method_exists(self::class, $methodName)) {
                         $function = $methodName;
                         $message = (isset($method[1]) ? $method[1] : "");
                         self::$function($item, $fields, $message, $args);
                     } else {
                         throw new \Exception("The rule '$method[0]' not exists");
-                    }   
-                }    
+                    }
+                }
             } else {
                 throw new \Exception("The rule for '$item' must be an array");
             }
@@ -33,6 +33,16 @@ class Validator
         return new static;
     }
 
+    public final static function addError($error)
+    {
+        if (is_array($error)) {
+            foreach ($error as $item) {
+                self::$errors[] = $item;
+            }
+        } else {
+            self::$errors[] = $error;
+        }
+    }
     /**
      * Verify if a field is required
      */
@@ -45,9 +55,10 @@ class Validator
     /**
      * Verify the max quantity for character
      */
-    private static function max($item, $fields, $message, $args){
+    private static function max($item, $fields, $message, $args)
+    {
         if (array_key_exists($item, $fields)) {
-            if(strlen($fields[$item]) > $args){
+            if (strlen($fields[$item]) > $args) {
                 self::$errors[] = (empty($message) ? "The max quantity for '$item' is " . $args : $message);
             }
         }
@@ -56,9 +67,10 @@ class Validator
     /**
      * Verify the min quantity for character
      */
-    private static function min($item, $fields, $message, $args){
+    private static function min($item, $fields, $message, $args)
+    {
         if (array_key_exists($item, $fields)) {
-            if(strlen($fields[$item]) < $args){
+            if (strlen($fields[$item]) < $args) {
                 self::$errors[] = (empty($message) ? "The min quantity for '$item' is " . $args : $message);
             }
         }
@@ -67,9 +79,10 @@ class Validator
     /**
      * Verify if is a valid e-mail
      */
-    private static function email($item, $fields, $message){
+    private static function email($item, $fields, $message)
+    {
         if (array_key_exists($item, $fields)) {
-            if(!filter_var($fields[$item], FILTER_VALIDATE_EMAIL)){
+            if (!filter_var($fields[$item], FILTER_VALIDATE_EMAIL)) {
                 self::$errors[] = (empty($message) ? "The e-mail is invalid" : $message);
             }
         }
@@ -77,9 +90,10 @@ class Validator
     /**
      * Verify if is boolean
      */
-    private static function bool($item, $fields, $message){
+    private static function bool($item, $fields, $message)
+    {
         if (array_key_exists($item, $fields)) {
-            if(!filter_var($fields[$item], FILTER_VALIDATE_BOOLEAN)){
+            if (!filter_var($fields[$item], FILTER_VALIDATE_BOOLEAN)) {
                 self::$errors[] = (empty($message) ? "The field '$item' is not a boolean" : $message);
             }
         }
@@ -87,9 +101,10 @@ class Validator
     /**
      * Verify if is domain
      */
-    private static function domain($item, $fields, $message){
+    private static function domain($item, $fields, $message)
+    {
         if (array_key_exists($item, $fields)) {
-            if(!filter_var($fields[$item], FILTER_VALIDATE_DOMAIN)){
+            if (!filter_var($fields[$item], FILTER_VALIDATE_DOMAIN)) {
                 self::$errors[] = (empty($message) ? "The field '$item' is not a valid domain" : $message);
             }
         }
@@ -97,9 +112,10 @@ class Validator
     /**
      * Verify if is float
      */
-    private static function float($item, $fields, $message){
+    private static function float($item, $fields, $message)
+    {
         if (array_key_exists($item, $fields)) {
-            if(!filter_var($fields[$item], FILTER_VALIDATE_FLOAT)){
+            if (!filter_var($fields[$item], FILTER_VALIDATE_FLOAT)) {
                 self::$errors[] = (empty($message) ? "The field '$item' is not a float" : $message);
             }
         }
@@ -107,9 +123,10 @@ class Validator
     /**
      * Verify if is INT
      */
-    private static function int($item, $fields, $message){
+    private static function int($item, $fields, $message)
+    {
         if (array_key_exists($item, $fields)) {
-            if(!filter_var($fields[$item], FILTER_VALIDATE_INT)){
+            if (!filter_var($fields[$item], FILTER_VALIDATE_INT)) {
                 self::$errors[] = (empty($message) ? "The field '$item' is not a int" : $message);
             }
         }
@@ -117,9 +134,10 @@ class Validator
     /**
      * Verify if is IP
      */
-    private static function ip($item, $fields, $message){
+    private static function ip($item, $fields, $message)
+    {
         if (array_key_exists($item, $fields)) {
-            if(!filter_var($fields[$item], FILTER_VALIDATE_IP)){
+            if (!filter_var($fields[$item], FILTER_VALIDATE_IP)) {
                 self::$errors[] = (empty($message) ? "The field '$item' is not a valid IP" : $message);
             }
         }
@@ -127,9 +145,10 @@ class Validator
     /**
      * Verify if is MAC
      */
-    private static function mac($item, $fields, $message){
+    private static function mac($item, $fields, $message)
+    {
         if (array_key_exists($item, $fields)) {
-            if(!filter_var($fields[$item], FILTER_VALIDATE_MAC)){
+            if (!filter_var($fields[$item], FILTER_VALIDATE_MAC)) {
                 self::$errors[] = (empty($message) ? "The field '$item' is not a valid MAC" : $message);
             }
         }
@@ -137,13 +156,31 @@ class Validator
     /**
      * Verify if is URL
      */
-    private static function url($item, $fields, $message){
+    private static function url($item, $fields, $message)
+    {
         if (array_key_exists($item, $fields)) {
-            if(!filter_var($fields[$item], FILTER_VALIDATE_URL)){
+            if (!filter_var($fields[$item], FILTER_VALIDATE_URL)) {
                 self::$errors[] = (empty($message) ? "The field '$item' is not a valid URL" : $message);
             }
         }
     }
+
+    private static function confirmed($item, $fields, $message)
+    {
+        $confirmation = $item . '_confirmation';
+        if(array_key_exists($item, $fields)) {
+            if (array_key_exists($confirmation, $fields)) {
+                if ($fields[$item] != $fields[$confirmation]) {
+                    self::$errors[] = (empty($message) ? "The field '$item' require confirmation" : $message);
+                }
+            } else {
+                self::required($confirmation,$fields,"");
+            }
+        }
+    }
+    /**
+     * Return the errors
+     */
     public function errors()
     {
         if (sizeof(self::$errors) == 0) {

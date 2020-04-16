@@ -69,6 +69,7 @@ class Request
      */
     public final static function get(array $itens = array())
     {
+        $_GET   = filter_input_array(INPUT_GET, FILTER_SANITIZE_STRING);
         if (count($itens) > 0) {
             $temp = [];
             foreach ($itens as $item) {
@@ -87,6 +88,7 @@ class Request
      */
     public final static function post(array $itens = array())
     {
+        $_POST  = filter_input_array(INPUT_POST, FILTER_SANITIZE_STRING);
         if (count($itens) > 0) {
             $temp = [];
             foreach ($itens as $item) {
