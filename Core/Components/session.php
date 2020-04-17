@@ -14,5 +14,5 @@ function session($item = '')
  * get a flashed session item
  */
 function flashed(){
-    return Request::session('data') ?? null;
+    return Request::session('flashed') ?? null;
 }

@@ -21,5 +21,5 @@ function view(string $View, array $args = array())
 		throw new \Exception("View '$View' not found");
 	}
 	ob_end_flush();
-	Request::clearSession('data');
+	Request::clearDataSession('flashed');
 }

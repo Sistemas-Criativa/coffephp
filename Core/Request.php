@@ -105,17 +105,17 @@ class Request
     /**
      * Save data in a session
      */
-    public final static function saveSession($value, string $sessionName = "")
+    public final static function saveDataSession(string $identifier, $value, string $sessionName = "")
     {
-        $_SESSION[(empty($sessionName) ? Config::session() : $sessionName)] = $value;
+        $_SESSION[(empty($sessionName) ? Config::session() : $sessionName)][$identifier] = $value;
     }
 
     /**
      * Unset a session
      */
-    public final static function clearSession(string $sessionName = "")
+    public final static function clearDataSession(string $identifier, string $sessionName = "")
     {
-        unset($_SESSION[(empty($sessionName) ? Config::session() : $sessionName)]);
+        unset($_SESSION[(empty($sessionName) ? Config::session() : $sessionName)][$identifier]);
     }
 
     /**
@@ -129,10 +129,10 @@ class Request
     /**
      * Get session data
      */
-    public final static function session(string $sessionName = "")
+    public final static function session(string $identifier, string $sessionName = "")
     {
-        if (isset($_SESSION[(empty($sessionName) ? Config::session() : $sessionName)])) {
-            return $_SESSION[(empty($sessionName) ? Config::session() : $sessionName)];
+        if (isset($_SESSION[(empty($sessionName) ? Config::session() : $sessionName)][$identifier])) {
+            return $_SESSION[(empty($sessionName) ? Config::session() : $sessionName)][$identifier];
         } else {
             return false;
         }
@@ -154,16 +154,16 @@ class Request
      */
     public final static function back(array $args = array())
     {
-        self::saveSession($args,'data');
+        self::saveDataSession('flashed' ,$args);
         header('location: ' .  Request::server('REQUEST_URI'));
     }
 
     /**
      * redirect to a route
      */
-    public final static function route($route, array $args = array())
+    public final static function route($route ,array $args = array())
     {
-        self::saveSession($args,'data');
+        self::saveDataSession('flashed', $args);
         header('location: ' .  Route::route($route, true, $args));
     }
 
