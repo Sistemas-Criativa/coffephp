@@ -13,6 +13,16 @@ function session($item = '')
 /**
  * get a flashed session item
  */
-function flashed(){
-    return Request::session('flashed') ?? null;
+function flashed(string $identifier = ''){
+    if(empty($identifier)) {
+        return Request::session('flashed');
+    } else {
+        $flashed = Request::session('flashed');
+        if(isset($flashed[$identifier])){
+            return $flashed[$identifier];
+        } else {
+            return false;
+        }
+    }
+    
 }
