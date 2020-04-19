@@ -12,7 +12,7 @@ function view(string $View, array $args = array())
 		$$arg = $value;
 	}
 	$separator = array('\\', '/');
-	$View = str_replace($separator, DIRECTORY_SEPARATOR, "../" . $View);
+	$View = str_replace($separator, DIRECTORY_SEPARATOR, "../" . "Views" . DIRECTORY_SEPARATOR . $View);
 	ob_start();
 	//verify if file exists
 	if (file_exists($View . '.php')) {
@@ -20,6 +20,7 @@ function view(string $View, array $args = array())
 	} else {
 		throw new \Exception("View '$View' not found");
 	}
-	ob_end_flush();
 	Request::clearDataSession('flashed');
+	return ob_get_contents();
+	ob_end_flush();
 }

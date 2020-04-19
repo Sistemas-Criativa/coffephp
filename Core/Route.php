@@ -12,6 +12,7 @@ class Route
 
     protected static $routes = array();
     private static $route = "";
+    private static $tokennized = false;
     private static $name = "";
     private static $prefixController = "";
     private static $controller = "";
@@ -25,6 +26,7 @@ class Route
         //define internal vars
         self::$route = $route;
         self::$controller = $controller;
+        self::$tokennized = false;
         //save a Route
         self::saveRoute('GET');
         return (new static);
@@ -44,7 +46,7 @@ class Route
      */
     private final static function saveRoute($method)
     {
-        array_push((new static)::$routes, array('name' => self::$name, 'route' => self::$route, 'controller' => self::$prefixController . self::$controller, 'method' => strtoupper($method), 'filters' => self::$filters));
+        array_push((new static)::$routes, array('name' => self::$name, 'route' => self::$route, 'controller' => self::$prefixController . self::$controller, 'method' => strtoupper($method), 'filters' => self::$filters, 'tokennized' => self::$tokennized));
         self::$name = "";
         self::$filters = array();
     }
@@ -113,10 +115,11 @@ class Route
     /**
      * Create a post Route
      */
-    public final static function Post($route, $controller)
+    public final static function Post($route, $controller, $tokennized = true)
     {
         self::$route = $route;
         self::$controller = $controller;
+        self::$tokennized = $tokennized;
         self::saveRoute('POST');
         return (new static);
     }
@@ -134,6 +137,13 @@ class Route
     }
 
     /**
+     * Verify if tokken has sent
+     */
+    private static function verifyToken()
+    {
+
+    }
+    /**
      * Open the route
      */
     private static function openRoute()
@@ -150,6 +160,7 @@ class Route
         $controller = "";
         $arguments = array();
         $method = "";
+        $tokennized = false;
 
 
         $filter = array();
@@ -171,6 +182,7 @@ class Route
                                 $controller = self::$routes[$j]['controller'];
                                 $method = self::$routes[$j]['method'];
                                 $filter = self::$routes[$j]['filters'];
+                                $tokennized = self::$routes[$j]['tokennized'];
                                 $matchs++;
                             }
                         }
@@ -183,6 +195,7 @@ class Route
                             array_push($arguments, $args[$i]);
                             $method = self::$routes[$j]['method'];
                             $filter = self::$routes[$j]['filters'];
+                            $tokennized = self::$routes[$j]['tokennized'];
                             $matchs++;
                         }
                     }
@@ -196,6 +209,15 @@ class Route
         }
 
         if ($match) {
+            if($tokennized) {
+                if(isset(Request::post()['_token'])) {
+                    if(Request::post()['_token'] != Request::session('internal_token')){
+                        throw new \Exception("The route needs a auth Token.", 2);
+                    }
+                } else {
+                    throw new \Exception("The route needs a auth Token.", 2);
+                }
+            }
             //verify if method is allowed
             self::verifyMethod($method);
             self::verifyFilters($filter);

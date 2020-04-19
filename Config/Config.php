@@ -10,7 +10,8 @@ class Config
         "base" => "",
         "session" => "coffePHP",
         "password" => "",
-        "Connection" => null
+        "Connection" => null,
+        "from_email" => 'noreply@domain.com'
     ];
 
     private static $instance = null;
