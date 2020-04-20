@@ -102,7 +102,7 @@ class Model extends Config
     }
 
     /** execute an update */
-    final public static function update($data, $table = null)
+    final public static function update(array $data, $table = null)
     {
         self::$bindParams = self::verifyFillables($data);
         self::$query = "UPDATE " . ($table != null ? $table : self::tableName()) . ' SET ' . self::prepareBind(self::$bindParams);
@@ -165,7 +165,7 @@ class Model extends Config
                     }
                     $count++;
                 }
-                
+
                 return $temp;
             } else {
                 return $connection;
@@ -173,7 +173,6 @@ class Model extends Config
         } else {
             return array();
         }
-        
     }
 
     /**
@@ -222,7 +221,7 @@ class Model extends Config
     final public static function where($field = '', $operator = '', $value = '')
     {
         //add the condition
-        if (empty($field) || empty($operator) || empty($value)) {
+        if ($field == '' || $operator == '' || $value == '') {
             self::$query .= (self::$where == false ? ' WHERE ' : '');
         } else {
             self::$bindParams[$field] = $value;
@@ -238,7 +237,7 @@ class Model extends Config
     final public static function and($field = '', $operator = '', $value = '')
     {
         //add the condition
-        if (empty($field) || empty($operator) || empty($value)) {
+        if ($field == '' || $operator == '' || $value == '') {
             self::$query .= ' AND ';
         } else {
             self::$bindParams[$field] = $value;
@@ -251,7 +250,7 @@ class Model extends Config
     final public static function or($field = '', $operator = '', $value = '')
     {
         //add the condition
-        if (empty($field) || empty($operator) || empty($value)) {
+        if ($field == '' || $operator == '' || $value == '') {
             self::$query .= ' OR ';
         } else {
             self::$bindParams[$field] = $value;

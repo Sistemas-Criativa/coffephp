@@ -168,13 +168,13 @@ class Validator
     private static function confirmed($item, $fields, $message)
     {
         $confirmation = $item . '_confirmation';
-        if(array_key_exists($item, $fields)) {
+        if (array_key_exists($item, $fields)) {
             if (array_key_exists($confirmation, $fields)) {
                 if ($fields[$item] != $fields[$confirmation]) {
                     self::$errors[] = (empty($message) ? "The field '$item' require confirmation" : $message);
                 }
             } else {
-                self::required($confirmation,$fields,"");
+                self::required($confirmation, $fields, "");
             }
         }
     }

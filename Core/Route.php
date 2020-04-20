@@ -75,7 +75,7 @@ class Route
     /**
      * get a specific route
      */
-    public final static function route(string $name, bool $fullURL = false,array $args = [])
+    public final static function route(string $name, bool $fullURL = false, array $args = [])
     {
         $return = "";
         $usedargs = 0;
@@ -105,7 +105,7 @@ class Route
 
                 //join a Route
                 $return = implode("/", $temp);
-                if($fullURL)
+                if ($fullURL)
                     $return = Request::server('REQUEST_SCHEME') . '://' . Request::server('HTTP_HOST') . $return;
             }
         }
@@ -141,7 +141,6 @@ class Route
      */
     private static function verifyToken()
     {
-
     }
     /**
      * Open the route
@@ -192,7 +191,7 @@ class Route
                             $controller = self::$routes[$j]['controller'];
 
                             //add to args list to a function
-                            array_push($arguments, $args[$i]);
+                            array_push($arguments, Request::sanitize($args[$i]));
                             $method = self::$routes[$j]['method'];
                             $filter = self::$routes[$j]['filters'];
                             $tokennized = self::$routes[$j]['tokennized'];
@@ -209,9 +208,9 @@ class Route
         }
 
         if ($match) {
-            if($tokennized) {
-                if(isset(Request::post()['_token'])) {
-                    if(Request::post()['_token'] != Request::session('internal_token')){
+            if ($tokennized) {
+                if (isset(Request::post()['_token'])) {
+                    if (Request::post()['_token'] != Request::session('internal_token')) {
                         throw new \Exception("The route needs a auth Token.", 2);
                     }
                 } else {

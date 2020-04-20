@@ -16,4 +16,8 @@ function route($name = '', $fullURL = false,$args = array()){
 		return $Route->route($name, $fullURL ,$args);
 	}
 }
+
+function assets(){
+	return route()['root'];
+}
 ?>

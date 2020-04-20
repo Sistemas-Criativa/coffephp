@@ -44,7 +44,7 @@
             text-decoration: underline
         }
     </style>
-    <?php include($include) ?>
+    <?php include($include . ".php") ?>
 </body>
 
 </html>

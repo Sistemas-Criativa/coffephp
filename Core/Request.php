@@ -47,7 +47,7 @@ class Request
     /**
      * Insert query params to get
      */
-    public final static function query(string $request) : void
+    public final static function query(string $request): void
     {
         $params = explode("&", substr($request, strpos($request, "?") + 1));
         foreach ($params as $item) {
@@ -56,6 +56,10 @@ class Request
         }
     }
 
+    public static final function sanitize(string $value)
+    {
+        return filter_var($value, FILTER_SANITIZE_STRING);
+    }
     /**
      * retorna o método da requisição
      */
@@ -69,7 +73,7 @@ class Request
      */
     public final static function get(array $itens = array())
     {
-        $_GET   = filter_input_array(INPUT_GET, FILTER_SANITIZE_STRING);
+        $_GET = filter_input_array(INPUT_GET, FILTER_SANITIZE_STRING);
         if (count($itens) > 0) {
             $temp = [];
             foreach ($itens as $item) {
@@ -141,8 +145,9 @@ class Request
     /**
      * Redirect
      */
-    public final static function redirect($url = ""){
-        if(empty($url)) {
+    public final static function redirect($url = "")
+    {
+        if (empty($url)) {
             return (new static);
         } else {
             self::url($url);
@@ -154,14 +159,14 @@ class Request
      */
     public final static function back(array $args = array())
     {
-        self::saveDataSession('flashed' ,$args);
+        self::saveDataSession('flashed', $args);
         header('location: ' .  Request::server('REQUEST_URI'));
     }
 
     /**
      * redirect to a route
      */
-    public final static function route($route ,array $args = array())
+    public final static function route($route, array $args = array())
     {
         self::saveDataSession('flashed', $args);
         header('location: ' .  Route::route($route, true, $args));

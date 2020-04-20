@@ -10,6 +10,7 @@ mb_http_output('UTF-8');
  */
 function ErrorHandler($error_level, $error_message, $error_file, $error_line)
 {
+	ob_get_clean();
 	echo '<div style="background: #f1f1f1;padding: 20px;">';
 	echo '<h3 style="margin-left:30px">Ops there a Error</h3>';
 	echo '<b style="margin-left:30px">Error:</b> ' . $error_message . '<br>';
@@ -26,6 +27,7 @@ function ErrorHandler($error_level, $error_message, $error_file, $error_line)
  */
 function ExceptionHandler($e)
 {
+	ob_get_clean();
 	echo '<div style="background: #f1f1f1;padding: 20px;">';
 	echo '<h3 style="margin-left:30px">Ops there an exception</h3>';
 	echo '<b style="margin-left:30px">Exception:</b> ' . $e->getMessage() . '<br>';
