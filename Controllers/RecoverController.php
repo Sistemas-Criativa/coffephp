@@ -30,7 +30,7 @@ class RecoverController extends Controllers
             redirect()->route('dashboard');
         }
         $valid = Recover::selectCount('id_User', 'VALID')->where('Token', '=', $token)->and('Status', '=', '0')->and('TIMESTAMPDIFF(HOUR,NOW(),Date)', '<', '1')->execute();
-        if ($valid[0]['VALID'] == 1) {
+        if ($valid[0]->VALID == 1) {
             view("master.view", ["title" => "Recuperção de senha - CoffePHP", 'include' => 'reset.view', 'token' => $token]);
         } else {
             redirect()->route('show.recover', ['errors' => ['O código não é valido, inicie novamente o processo de redefinição']]);
@@ -55,7 +55,7 @@ class RecoverController extends Controllers
             ->limit(1)
             ->execute();
         if (count($user) > 0) {
-            User::update(['Password' => Utilities::hash(Request::post()['Password'])])->where('id', '=', $user[0]['id'])->execute();
+            User::update(['Password' => Utilities::hash(Request::post()['Password'])])->where('id', '=', $user[0]->id)->execute();
             Recover::update(['Status', '=',  '1'])->where('Token', '=', $token)->execute();
             redirect()->route('show.login', ['message' => 'Senha alterada com sucesso, agora você já pode fazer login']);
         } else {
@@ -80,7 +80,7 @@ class RecoverController extends Controllers
             ->execute();
         if (count($user) > 0) {
             $token =  Utilities::token();
-            Recover::create(['id_User' => $user[0]['id'], 'Token' => $token]);
+            Recover::create(['id_User' => $user[0]->id, 'Token' => $token]);
             Email::to(Request::post()['Email'])
                 ->subject('Redefinição de senha')
                 ->message(view('Emails\recover.view', ['user' => $user[0], 'token' => $token]))

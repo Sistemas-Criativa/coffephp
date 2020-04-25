@@ -3,6 +3,7 @@
 namespace Core;
 
 use Config\Config;
+use Core\Query;
 
 class Model extends Config
 {
@@ -158,9 +159,11 @@ class Model extends Config
             $count = 0;
             if ($results != false) {
                 while ($row = $results->fetch_assoc()) {
+                    $obj = new Query;
                     foreach ($row as $item => $value) {
                         if (!in_array($item, (new static)->hidden)) {
-                            $temp[$count][$item] = $value;
+                            $obj->$item = $value;
+                            $temp[$count] = $obj;
                         }
                     }
                     $count++;
@@ -198,7 +201,11 @@ class Model extends Config
         $params = self::verifyFillables($params);
         self::insert($params);
         $params['id'] = self::execute()->insert_id;
-        return $params;
+        $obj = new Query();
+        foreach($params  as $item => $value){
+            $obj->$item = $value;
+        }
+        return $obj;
     }
     /** write the query in sql */
     final public static function toSQL()

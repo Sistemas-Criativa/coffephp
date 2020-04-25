@@ -26,7 +26,7 @@
             <input type="password" required name="Password_confirmation" placeholder="Confirme a senha" />
         </div>
         <div class="row">
-            <input type="submit" value="Entrar" />
+            <input type="submit" value="Cadastrar" />
             <div>
                 <input type="button" value="Voltar" onclick="location.href = '<?= route('home') ?>'" />
             </div>
