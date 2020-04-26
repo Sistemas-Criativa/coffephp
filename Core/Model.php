@@ -16,6 +16,10 @@ class Model extends Config
     private static $stm;
     private static $where = false;
     private static $bindParams = array();
+    private static $object = [];
+    private static $primaryKey = [];
+    private static $foreignKey = [];
+    private static $name = [];
 
     /* define the table name with base classe if table is not specified*/
     function __construct()
@@ -36,12 +40,34 @@ class Model extends Config
     {
         return (new static)->hidden;
     }
+    private static function MakeQueryObject($object){
+        $temp = [];
+        for($i = 0; $i < sizeof($object); $i++){
+            $obj = new Query;
+            foreach ($object[$i] as $item => $value) {
+                if (!in_array($item, (new static)->hidden)) {
+                    $obj->$item = $value;
+                }
+            }
+            for($j = 0; $j < sizeof(self::$object); $j++){
+                for($k = 0; $k < sizeof(self::$object[$j]);$k++){
+                    $foreignKey = self::$foreignKey[$j];
+                    $primaryKey = self::$primaryKey[$j];
+                    $name = self::$name[$j];
+                   if($object[$i][$primaryKey] == self::$object[$j][$k]->$foreignKey){
+                       $obj->$name = self::$object[$j];
+                   }
+                }
+            }
+            $temp[] = $obj;
+        }
+        return $temp;
+    }
     /** Get all itens */
     final public static function all()
     {
         self::$query = "SELECT * FROM " . self::tableName();
-        $DB = (new static)->Instance()->Connection();
-        return $DB->query(self::$query);
+        return self::execute();
     }
 
     /** get the query  */
@@ -156,19 +182,9 @@ class Model extends Config
             $results = self::$stm->get_result();
             self::$stm->free_result();
             $temp = [];
-            $count = 0;
             if ($results != false) {
-                while ($row = $results->fetch_assoc()) {
-                    $obj = new Query;
-                    foreach ($row as $item => $value) {
-                        if (!in_array($item, (new static)->hidden)) {
-                            $obj->$item = $value;
-                            $temp[$count] = $obj;
-                        }
-                    }
-                    $count++;
-                }
-
+                $obj = $results->fetch_all(MYSQLI_ASSOC);
+                $temp = self::MakeQueryObject($obj);
                 return $temp;
             } else {
                 return $connection;
@@ -206,6 +222,14 @@ class Model extends Config
             $obj->$item = $value;
         }
         return $obj;
+    }
+
+    final public static function with($object, string $primaryKey, string $foreignKey, string $name){
+        self::$object[] = $object;
+        self::$primaryKey[] = $primaryKey;
+        self::$foreignKey[] = $foreignKey;
+        self::$name[] = $name;
+        return (new static);
     }
     /** write the query in sql */
     final public static function toSQL()
