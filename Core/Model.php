@@ -51,14 +51,16 @@ class Model extends Config
             }
             for($j = 0; $j < sizeof(self::$object); $j++){
                 $name = self::$name[$j];
+                $match = false;
                 for($k = 0; $k < sizeof(self::$object[$j]);$k++){
                     $foreignKey = self::$foreignKey[$j];
                     $primaryKey = self::$primaryKey[$j];
                    if($object[$i][$primaryKey] == self::$object[$j][$k]->$foreignKey){
                        $obj->$name = self::$object[$j];
+                       $match = true;
                    }
                 }
-                if(sizeof(self::$object[$j])==0){
+                if($match == false){
                     $obj->$name = [];
                 }
             }
