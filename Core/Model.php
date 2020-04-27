@@ -52,16 +52,19 @@ class Model extends Config
             for($j = 0; $j < sizeof(self::$object); $j++){
                 $name = self::$name[$j];
                 $match = false;
+                $foreignKey = self::$foreignKey[$j];
+                $primaryKey = self::$primaryKey[$j];
+                $tempobj = [];
                 for($k = 0; $k < sizeof(self::$object[$j]);$k++){
-                    $foreignKey = self::$foreignKey[$j];
-                    $primaryKey = self::$primaryKey[$j];
                    if($object[$i][$primaryKey] == self::$object[$j][$k]->$foreignKey){
-                       $obj->$name = self::$object[$j];
+                       $tempobj[] = self::$object[$j][$k];
                        $match = true;
                    }
                 }
                 if($match == false){
                     $obj->$name = [];
+                } else {
+                    $obj->$name = $tempobj;
                 }
             }
             $temp[] = $obj;
