@@ -17,9 +17,6 @@ function route($name = '', $fullURL = false,$args = array()){
 	}
 }
 
-/**
- * Return a public path folder from project
- */
 function assets(){
 	return route()['root'];
 }
@@ -28,11 +25,10 @@ function assets(){
  * Generate a Slug
  */
 function slugfy($str) {
-    $search = array('Ș', 'Ț', 'ş', 'ţ', 'Ş', 'Ţ', 'ș', 'ț', 'î', 'â', 'ă', 'Î', 'Â', 'Ă', 'ë', 'Ë', 'á');
-    $replace = array('s', 't', 's', 't', 's', 't', 's', 't', 'i', 'a', 'a', 'i', 'a', 'a', 'e', 'E', 'a');
+    $search = array('Ș', 'Ț', 'ş', 'ţ', 'Ş', 'Ţ', 'ș', 'ț', 'î', 'â', 'ă', 'Î', 'Â', 'Ă', 'ë', 'Ë', 'á', 'Á', 'ç' ,'Ç', 'ã', 'Ã');
+    $replace = array('s', 't', 's', 't', 's', 't', 's', 't', 'i', 'a', 'a', 'i', 'a', 'a', 'e', 'E', 'a', 'A', 'c' ,'C', 'a', 'A');
     $str = str_ireplace($search, $replace, strtolower(trim($str)));
     $str = preg_replace('/[^\w\d\-\ ]/', '', $str);
     $str = str_replace(' ', '-', $str);
     return preg_replace('/\-{2,}/', '-', $str);
 }
-?>
