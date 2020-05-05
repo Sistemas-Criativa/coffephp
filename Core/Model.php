@@ -69,6 +69,10 @@ class Model extends Config
             }
             $temp[] = $obj;
         }
+        self::$object = [];
+        self::$primaryKey = [];
+        self::$foreignKey = [];
+        self::$name = [];
         return $temp;
     }
     /** Get all itens */

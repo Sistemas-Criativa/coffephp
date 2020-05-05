@@ -1,6 +1,6 @@
 <?php
 /**
- * Include an view
+ * Include a view
  */
 function including(string $file, array $args = array()){
     //get the args
@@ -19,6 +19,6 @@ function including(string $file, array $args = array()){
 	if (file_exists($view)) {
 		include_once($view);
 	} else {
-		throw new \Exception("View '$View' not found");
+		throw new \Exception("View '$view' not found");
 	}
 }
