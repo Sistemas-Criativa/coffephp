@@ -6,6 +6,7 @@ include_once('Components/session.php');
 include_once('Components/redirect.php');
 include_once('Components/token.php');
 include_once('Components/view.php');
+include_once('Components/including.php');
 
 function pre($param)
 {

@@ -1,5 +1,7 @@
 <?php
-
+$separator = array('\\', '/');
+$dir = str_replace($separator, DIRECTORY_SEPARATOR, __DIR__);
+define('ROOT', __DIR__);
 /**
  * Register de autoload
  */

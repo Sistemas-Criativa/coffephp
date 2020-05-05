@@ -93,11 +93,15 @@ class Request
     public final static function post(array $itens = array())
     {
         $_POST  = filter_input_array(INPUT_POST, FILTER_SANITIZE_STRING);
+        $json = file_get_contents('php://input');
+        $json = json_decode($json,true);
         if (count($itens) > 0) {
             $temp = [];
             foreach ($itens as $item) {
                 if (isset($_POST[$item])) {
                     $temp[$item] = $_POST[$item];
+                } else if (isset($json[$item])){
+                    $temp[$item] = $json[$item];
                 }
             }
             return $temp;
@@ -109,9 +113,13 @@ class Request
     /**
      * Save data in a session
      */
-    public final static function saveDataSession(string $identifier, $value, string $sessionName = "")
+    public final static function saveDataSession(string $identifier, $value, bool $append = false, string $sessionName = "")
     {
-        $_SESSION[(empty($sessionName) ? Config::session() : $sessionName)][$identifier] = $value;
+        if($append){
+            $_SESSION[(empty($sessionName) ? Config::session() : $sessionName)][$identifier][] = $value;
+        } else {
+            $_SESSION[(empty($sessionName) ? Config::session() : $sessionName)][$identifier] = $value;
+        }
     }
 
     /**

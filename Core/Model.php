@@ -314,7 +314,7 @@ class Model extends Config
     }
 
     /** order a query */
-    final public static function order(array $order)
+    final public static function orderBy(array $order)
     {
 
         //add the order
