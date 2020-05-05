@@ -1,4 +1,4 @@
-<?php include('logo.view.php') ?>
+<?php including('logo.view') ?>
 <div class="row">
     <h1 class="col row">Bem vindo</h1>
 </div>

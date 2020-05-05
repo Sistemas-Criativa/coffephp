@@ -1,4 +1,4 @@
-<?php include('logo.view.php') ?>
+<?php including('logo.view') ?>
 
 <div class="row" id="login">
     <h3>Login</h3>
@@ -35,7 +35,7 @@
     </form>
 </div>
 
-<?php include('footer.view.php') ?>
+<?php including('footer.view') ?>
 
 <style>
     #login {

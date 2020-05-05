@@ -1,4 +1,4 @@
-<?php include('logo.view.php') ?>
+<?php including('logo.view') ?>
 
 <div class="row" id="login">
     <h3>Recuperação de senha</h3>
@@ -22,7 +22,7 @@
     </form>
 </div>
 
-<?php include('footer.view.php') ?>
+<?php including('footer.view') ?>
 
 <style>
     #login {

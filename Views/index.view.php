@@ -1,2 +1,2 @@
-<?php include('menu.view.php') ?>
-<?php include('footer.view.php') ?>
+<?php including('menu.view') ?>
+<?php including('footer.view') ?>
