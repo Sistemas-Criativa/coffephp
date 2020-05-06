@@ -200,8 +200,8 @@ class Route
 		}
 		if ($match) {
 			if ($tokennized) {
-				if (isset(Request::post()['_token'])) {
-					if (Request::post()['_token'] != Request::session('internal_token')) {
+				if (count(Request::post(['_token']))>0) {
+					if (Request::post(['_token'])['_token'] != Request::session('internal_token')) {
 						throw new \Exception("The route needs a auth Token.", 2);
 					}
 				} else {
