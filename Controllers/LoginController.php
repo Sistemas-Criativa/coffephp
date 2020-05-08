@@ -15,7 +15,7 @@ class LoginController extends Controllers
         if (Auth::user()) {
             redirect()->route('dashboard');
         }
-        view("master.view", ["title" => "Login - CoffePHP", 'include' => 'login.view']);
+        view("master.view", ["title" => TITLE . " - Login", 'include' => 'login.view']);
     }
 
     /**

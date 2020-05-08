@@ -13,6 +13,6 @@ class IndexController extends Controllers
      */
     function show()
     {
-        view("master.view", ["title" => "Welcome to CoffePHP", 'include' => 'index.view', 'user' => Auth::user()]);
+        view("master.view", ["title" => TITLE, 'include' => 'index.view', 'user' => Auth::user()]);
     }
 }

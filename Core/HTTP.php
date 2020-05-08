@@ -65,6 +65,10 @@ class HTTP
         510 => 'Not Extended'
     );
 
+    public final static function getStatusHTTP(int $http_code)
+    {
+        return (isset(self::$http_codes[$http_code]) ? self::$http_codes[$http_code] : '');
+    }
     /**
      * Return a http status header
      */

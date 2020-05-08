@@ -15,7 +15,7 @@ class SignController extends Controllers
         if (Auth::user()) {
             redirect()->route('dashboard');
         }
-        view("master.view", ["title" => "Cadastro - CoffePHP", 'include' => 'sign.view']);
+        view("master.view", ["title" => TITLE . " - Cadastro", 'include' => 'sign.view']);
     }
     /**
      * Initiates the signup

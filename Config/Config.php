@@ -11,7 +11,8 @@ class Config
         "session" => "coffePHP",
         "password" => "",
         "Connection" => null,
-        "from_email" => 'noreply@domain.com'
+        "from_email" => 'noreply@domain.com',
+        "title" => 'CoffePHP',
     ];
 
     private static $instance = null;
@@ -56,15 +57,15 @@ class Config
     /**
      * Get the config
      */
-    public final static function config($name = ''){
-        if(empty($name)){
+    public final static function config($name = '')
+    {
+        if (empty($name)) {
             return (new static)->option;
         } else {
-            if(isset((new static)->option[$name])) {
+            if (isset((new static)->option[$name])) {
                 return (new static)->option[$name];
             }
             return null;
         }
-        
     }
 }

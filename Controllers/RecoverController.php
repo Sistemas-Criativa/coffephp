@@ -21,7 +21,7 @@ class RecoverController extends Controllers
         if (Auth::user()) {
             redirect()->route('dashboard');
         }
-        view("master.view", ["title" => "Login - CoffePHP", 'include' => 'recover.view']);
+        view("master.view", ["title" => TITLE . " - Login", 'include' => 'recover.view']);
     }
 
     public function showReset($token)
@@ -31,7 +31,7 @@ class RecoverController extends Controllers
         }
         $valid = Recover::selectCount('id_User', 'VALID')->where('Token', '=', $token)->and('Status', '=', '0')->and('TIMESTAMPDIFF(HOUR,NOW(),Date)', '<', '1')->execute();
         if ($valid[0]->VALID == 1) {
-            view("master.view", ["title" => "Recuperção de senha - CoffePHP", 'include' => 'reset.view', 'token' => $token]);
+            view("master.view", ["title" => TITLE . " - Recuperção de senha", 'include' => 'reset.view', 'token' => $token]);
         } else {
             redirect()->route('show.recover', ['errors' => ['O código não é valido, inicie novamente o processo de redefinição']]);
         }
