@@ -30,6 +30,3 @@ class Response
         echo json_encode($content, JSON_UNESCAPED_UNICODE);
     }
 }
-//header('Content-type: application/json');
- //   header("HTTP/1.1 404 Not Found");
-  //  echo json_encode($object, JSON_UNESCAPED_UNICODE);

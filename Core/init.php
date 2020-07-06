@@ -40,7 +40,7 @@ function ExceptionHandler($e)
 set_error_handler('ErrorHandler');
 set_exception_handler('ExceptionHandler');
 require_once('../autoload.php');
-
+include_once("../Config.php");
 include_once('helpers.php');
 
 use Core\Core;

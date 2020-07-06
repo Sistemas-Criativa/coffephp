@@ -21,8 +21,7 @@ class Auth extends Request
         if ($validator->errors() !=  false) {
             return $validator->errors();
         }
-        $user = User::select()
-            ->where('Active', '=', '1')
+        $user = User::where('Active', '=', '1')
             ->and('User', '=', Utilities::hash(Request::post()['Email']))
             ->and('Password', '=', Utilities::hash(Request::post()['Password']))
             ->limit(1)
@@ -49,8 +48,7 @@ class Auth extends Request
         if ($validator->errors() !=  false) {
             return $validator->errors();
         }
-        $user = User::select()
-            ->Where('User', '=', Utilities::hash(Request::post()['Email']))
+        $user = User::Where('User', '=', Utilities::hash(Request::post()['Email']))
             ->and('Password', '=', Utilities::hash(Request::post()['Password']))
             ->limit(1)
             ->execute();

@@ -191,16 +191,16 @@ class Route
 						}
 					}
 				}
-
 				if ($matchs == count($args)) {
 					$match = true;
 					break;
 				}
 			}
 		}
+
 		if ($match) {
 			if ($tokennized) {
-				if (count(Request::post(['_token']))>0) {
+				if (count(Request::post(['_token'])) > 0) {
 					if (Request::post(['_token'])['_token'] != Request::session('internal_token')) {
 						throw new \Exception("The route needs a auth Token.", 2);
 					}
@@ -208,6 +208,7 @@ class Route
 					throw new \Exception("The route needs a auth Token.", 2);
 				}
 			}
+
 			//verify if method is allowed
 			self::verifyMethod($method);
 			self::verifyFilters($filter);
@@ -222,22 +223,49 @@ class Route
 		}
 		return new static;
 	}
+
 	public static function Routes()
 	{
 		self::openRoute();
 		return new static;
 	}
 
+	/**
+	 * Verify the filters
+	 */
 	private static function verifyFilters(array $filters)
 	{
 		$filterClass = new Filter;
-		foreach ($filters as $item) {
-			if (method_exists($filterClass, $item)) {
-				if (!$filterClass->$item()) {
-					header('location: ' . $filterClass->filters[$item]);
+		foreach ($filters as $item => $value) {
+			if (method_exists($filterClass, $value)) {
+				$returned = $filterClass->$value();
+				if ($returned !== true) {
+					if (isset($filterClass->filters)) {
+						if (isset($filterClass->filters[$value])) {
+							if (isset($filterClass->filters[$value]['api'])) {
+								if ($filterClass->filters[$value]['api'] === true) {
+									if (is_array($returned)) {
+										$http_status = (isset($returned['http_status']) ? $returned['http_status'] : 200);
+										if (isset($returned['http_status'])) {
+											unset($returned['http_status']);
+										}
+										response($returned, $http_status);
+									} else {
+										response($returned);
+									}
+									exit;
+								}
+							}
+							if (isset($filterClass->filters[$value]['redirect'])) {
+								header('location: ' . $filterClass->filters[$value]['redirect']);
+								exit;
+							}
+						}
+						HTTP::statusHTTP(403);
+					}
 				}
 			} else {
-				throw new \Exception("Filter '$item' not found");
+				throw new \Exception("Filter '$value' not found");
 			}
 		}
 	}

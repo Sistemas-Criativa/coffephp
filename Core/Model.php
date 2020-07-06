@@ -3,7 +3,6 @@
 namespace Core;
 
 use Config\Config;
-use Core\Query;
 
 class Model extends Config
 {
@@ -12,7 +11,9 @@ class Model extends Config
     protected $table = '';
     protected $fillables = [];
     protected $hidden = [];
+    protected $locked = [];
     protected static $query;
+    protected $key = 'id';
     private static $stm;
     private static $where = false;
     private static $bindParams = array();
@@ -20,6 +21,7 @@ class Model extends Config
     private static $primaryKey = [];
     private static $foreignKey = [];
     private static $name = [];
+    private static $starts = ['SELECT', 'UPDATE', 'DELETE', 'INSERT'];
 
     /* define the table name with base classe if table is not specified*/
     function __construct()
@@ -40,28 +42,30 @@ class Model extends Config
     {
         return (new static)->hidden;
     }
-    private static function MakeQueryObject($object){
+    private static function MakeQueryObject($object)
+    {
+        $class = static::class;
         $temp = [];
-        for($i = 0; $i < sizeof($object); $i++){
-            $obj = new Query;
+        for ($i = 0; $i < sizeof($object); $i++) {
+            $obj = new $class;
             foreach ($object[$i] as $item => $value) {
                 if (!in_array($item, (new static)->hidden)) {
                     $obj->$item = $value;
                 }
             }
-            for($j = 0; $j < sizeof(self::$object); $j++){
+            for ($j = 0; $j < sizeof(self::$object); $j++) {
                 $name = self::$name[$j];
                 $match = false;
                 $foreignKey = self::$foreignKey[$j];
                 $primaryKey = self::$primaryKey[$j];
                 $tempobj = [];
-                for($k = 0; $k < sizeof(self::$object[$j]);$k++){
-                   if($object[$i][$primaryKey] == self::$object[$j][$k]->$foreignKey){
-                       $tempobj[] = self::$object[$j][$k];
-                       $match = true;
-                   }
+                for ($k = 0; $k < sizeof(self::$object[$j]); $k++) {
+                    if ($object[$i][$primaryKey] == self::$object[$j][$k]->$foreignKey) {
+                        $tempobj[] = self::$object[$j][$k];
+                        $match = true;
+                    }
                 }
-                if($match == false){
+                if ($match == false) {
                     $obj->$name = [];
                 } else {
                     $obj->$name = $tempobj;
@@ -144,6 +148,7 @@ class Model extends Config
     final public static function update(array $data, $table = null)
     {
         self::$bindParams = self::verifyFillables($data);
+        self::$bindParams = self::verifyLocked(self::$bindParams);
         self::$query = "UPDATE " . ($table != null ? $table : self::tableName()) . ' SET ' . self::prepareBind(self::$bindParams);
         return (new static);
     }
@@ -182,6 +187,18 @@ class Model extends Config
      */
     final public static function execute()
     {
+        $select = false;
+        foreach (self::$starts as $reserved) {
+            if (strpos(self::$query, $reserved . ' ') === 0) {
+                $select = true;
+                break;
+            }
+        }
+
+        if (!$select) {
+            self::$query = "SELECT * FROM " . self::tableName() . self::$query;
+        }
+
         $connection = (new static)->Instance()->Connection();
         self::$query = $connection->real_escape_string(self::$query);
         self::$stm = $connection->prepare(self::$query);
@@ -221,6 +238,60 @@ class Model extends Config
         }
         return $temp;
     }
+
+    /**
+     * Verify locked itens
+     */
+    private final static function verifyLocked(array $data)
+    {
+        $temp = [];
+        foreach ($data as $item => $value) {
+            if (!is_numeric($item)) {
+                if (!in_array($item, (new static)->locked)) {
+                    $temp[$item] = $value;
+                }
+            }
+        }
+        return $temp;
+    }
+
+    /**
+     * Save the changes on model
+     */
+    public function save()
+    {
+        $temp = [];
+        foreach ($this as $prop => $value) {
+            $temp[$prop] = $value;
+        }
+
+        self::update($temp);
+        if (isset($temp[(new static)->key])) {
+            self::where((new static)->key, '=', $temp[(new static)->key]);
+        }
+        if (self::execute()->errno == 0) {
+            return true;
+        }
+        return false;
+    }
+
+
+    /**
+     * Save the changes on model
+     */
+    public function destroy()
+    {
+        self::delete(self::tableName());
+        $key = (new static)->key;
+        if (isset($this->$key)) {
+            self::where((new static)->key, '=', $this->$key);
+        }
+        if (self::execute()->errno == 0) {
+            return true;
+        }
+        return false;
+    }
+
     /**
      * Create a model
      */
@@ -229,14 +300,16 @@ class Model extends Config
         $params = self::verifyFillables($params);
         self::insert($params);
         $params['id'] = self::execute()->insert_id;
-        $obj = new Query();
-        foreach($params  as $item => $value){
+        $class = static::class;
+        $obj = new $class;
+        foreach ($params  as $item => $value) {
             $obj->$item = $value;
         }
         return $obj;
     }
 
-    final public static function with($object, string $primaryKey, string $foreignKey, string $name){
+    final public static function with($object, string $primaryKey, string $foreignKey, string $name)
+    {
         self::$object[] = $object;
         self::$primaryKey[] = $primaryKey;
         self::$foreignKey[] = $foreignKey;
@@ -246,6 +319,18 @@ class Model extends Config
     /** write the query in sql */
     final public static function toSQL()
     {
+        $select = false;
+        foreach (self::$starts as $reserved) {
+            if (strpos(self::$query, $reserved . ' ') === 0) {
+                $select = true;
+                break;
+            }
+        }
+
+        if (!$select) {
+            self::$query = "SELECT * FROM " . self::tableName() . self::$query;
+        }
+
         $values = array_values(self::$bindParams);
         if (sizeof(self::$bindParams) > 0) {
             $query = self::$query;
@@ -261,14 +346,16 @@ class Model extends Config
     }
 
     /** add where to query */
-    final public static function where($field = '', $operator = '', $value = '')
+    final public static function where($field = '', $operator = '', $value = '', bool $valueIsFunction = false)
     {
         //add the condition
         if ($field == '' || $operator == '' || $value == '') {
             self::$query .= (self::$where == false ? ' WHERE ' : '');
         } else {
-            self::$bindParams[$field] = $value;
-            self::$query .= (self::$where == false ? ' WHERE ' : '') . $field . ' ' . $operator . ' ' . self::prepareBind([$field], true);
+            if (!$valueIsFunction)
+                self::$bindParams[$field] = $value;
+
+            self::$query .= (self::$where == false ? ' WHERE ' : '') . $field . ' ' . $operator . ' ' . ($valueIsFunction ? $value : self::prepareBind([$field], true));
         }
         if (self::$where == false) {
             self::$where = true;
@@ -277,27 +364,31 @@ class Model extends Config
     }
 
     /** add and to query */
-    final public static function and($field = '', $operator = '', $value = '')
+    final public static function and($field = '', $operator = '', $value = '', bool $valueIsFunction = false)
     {
         //add the condition
         if ($field == '' || $operator == '' || $value == '') {
             self::$query .= ' AND ';
         } else {
-            self::$bindParams[$field] = $value;
-            self::$query .= ' AND ' . $field . ' ' . $operator . ' ' . self::prepareBind([$field], true);
+            if (!$valueIsFunction)
+                self::$bindParams[$field] = $value;
+
+            self::$query .= ' AND ' . $field . ' ' . $operator . ' ' . ($valueIsFunction ? $value : self::prepareBind([$field], true));
         }
         return (new static);
     }
 
     /** add or to query */
-    final public static function or($field = '', $operator = '', $value = '')
+    final public static function or($field = '', $operator = '', $value = '', bool $valueIsFunction = false)
     {
         //add the condition
         if ($field == '' || $operator == '' || $value == '') {
             self::$query .= ' OR ';
         } else {
-            self::$bindParams[$field] = $value;
-            self::$query .= ' OR ' . $field . ' ' . $operator . ' ' . self::prepareBind([$field], true);
+            if (!$valueIsFunction)
+                self::$bindParams[$field] = $value;
+
+            self::$query .= ' OR ' . $field . ' ' . $operator . ' ' . ($valueIsFunction ? $value : self::prepareBind([$field], true));
         }
         return (new static);
     }

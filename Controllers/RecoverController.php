@@ -45,8 +45,7 @@ class RecoverController extends Controllers
         if ($validator->errors() !=  false) {
             redirect()->back(['errors' => $validator->errors()]);
         }
-        $user = User::select()
-            ->where()
+        $user = User::where()
             ->in('id')
             ->select(['id_User'], Recover::tableName())
             ->where('Token', '=', $token)
@@ -74,8 +73,7 @@ class RecoverController extends Controllers
         if ($validator->errors() !=  false) {
             redirect()->back(['errors' => $validator->errors()]);
         }
-        $user = User::select()
-            ->where('User', '=', Utilities::hash(Request::post()['Email']))
+        $user = User::where('User', '=', Utilities::hash(Request::post()['Email']))
             ->limit(1)
             ->execute();
         if (count($user) > 0) {

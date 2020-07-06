@@ -13,8 +13,7 @@ class Core extends Route
     {
         define('TITLE', Config::config('title'));
         session_start();
-        if(Request::session('internal_token')==false)
-        {
+        if (Request::session('internal_token') == false) {
             Request::saveDataSession('internal_token', Utilities::token());
         }
         include_once("../Routes" . DIRECTORY_SEPARATOR . "web.php");

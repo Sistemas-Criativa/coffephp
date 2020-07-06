@@ -199,4 +199,11 @@ class Request
     {
         header('location: ' .  $url);
     }
+
+    /**
+     * allow access from helper
+     */
+    public final static function getRequests(){
+        return new static;
+    }
 }
