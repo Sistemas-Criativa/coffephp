@@ -104,8 +104,12 @@ class Model extends Config
         if ($fields == null) {
             self::$query .= "* FROM ";
         } else {
+            $temp = [];
+            foreach ($fields as $item => $value) {
+                $temp[] = [$item => $value];
+            }
             //divide the fields and make a query
-            self::$query .= self::splitFields($fields)['fields'] . " FROM ";
+            self::$query .= self::splitFields($temp)['fields'] . " FROM ";
         }
         //add the table name
         self::$query .= ($table != null ? $table : self::tableName());
@@ -173,10 +177,13 @@ class Model extends Config
     {
         $types = "";
         $itens = [];
-        foreach (self::$bindParams as $field => $value) {
-            $types .= "s";
-            $itens[] = $value;
+        for ($i = 0; $i < sizeof(self::$bindParams); $i++) {
+            foreach (self::$bindParams[$i] as $field => $value) {
+                $types .= "s";
+                $itens[] = $value;
+            }
         }
+
         if (count($itens) > 0)
             self::$stm->bind_param($types, ...$itens);
     }
@@ -232,7 +239,7 @@ class Model extends Config
         foreach ($data as $item => $value) {
             if (!is_numeric($item)) {
                 if (in_array($item, (new static)->fillables)) {
-                    $temp[$item] = $value;
+                    $temp[] = [$item => $value];
                 }
             }
         }
@@ -240,15 +247,22 @@ class Model extends Config
     }
 
     /**
+     * Verify fillables itens
+     */
+    private final static function bindWhere($field, $value)
+    {
+        self::$bindParams[] = [$field => $value];
+    }
+    /**
      * Verify locked itens
      */
     private final static function verifyLocked(array $data)
     {
         $temp = [];
-        foreach ($data as $item => $value) {
-            if (!is_numeric($item)) {
-                if (!in_array($item, (new static)->locked)) {
-                    $temp[$item] = $value;
+        foreach ($data as $item) {
+            foreach ($item as $subitem => $value) {
+                if (!in_array($subitem, (new static)->locked)) {
+                    $temp[] = [$subitem => $value];
                 }
             }
         }
@@ -297,14 +311,14 @@ class Model extends Config
      */
     final public static function create(array $params)
     {
-        $params = self::verifyFillables($params);
         self::insert($params);
-        $params['id'] = self::execute()->insert_id;
+        $id = self::execute()->insert_id;
         $class = static::class;
         $obj = new $class;
         foreach ($params  as $item => $value) {
             $obj->$item = $value;
         }
+        $obj->id = $id;
         return $obj;
     }
 
@@ -331,8 +345,15 @@ class Model extends Config
             self::$query = "SELECT * FROM " . self::tableName() . self::$query;
         }
 
-        $values = array_values(self::$bindParams);
-        if (sizeof(self::$bindParams) > 0) {
+
+        $values = [];
+        for ($i = 0; $i < sizeof(self::$bindParams); $i++) {
+            foreach (self::$bindParams[$i] as $item) {
+                $values[] = $item;
+            }
+        }
+
+        if (sizeof($values) > 0) {
             $query = self::$query;
             self::$query = "";
             self::$where = false;
@@ -353,13 +374,14 @@ class Model extends Config
             self::$query .= (self::$where == false ? ' WHERE ' : '');
         } else {
             if (!$valueIsFunction)
-                self::$bindParams[$field] = $value;
+                self::$bindParams[] = [$field => $value];
 
             self::$query .= (self::$where == false ? ' WHERE ' : '') . $field . ' ' . $operator . ' ' . ($valueIsFunction ? $value : self::prepareBind([$field], true));
         }
         if (self::$where == false) {
             self::$where = true;
         }
+
         return (new static);
     }
 
@@ -371,7 +393,7 @@ class Model extends Config
             self::$query .= ' AND ';
         } else {
             if (!$valueIsFunction)
-                self::$bindParams[$field] = $value;
+                self::$bindParams[] = [$field => $value];
 
             self::$query .= ' AND ' . $field . ' ' . $operator . ' ' . ($valueIsFunction ? $value : self::prepareBind([$field], true));
         }
@@ -386,7 +408,7 @@ class Model extends Config
             self::$query .= ' OR ';
         } else {
             if (!$valueIsFunction)
-                self::$bindParams[$field] = $value;
+                self::$bindParams[] = [$field => $value];
 
             self::$query .= ' OR ' . $field . ' ' . $operator . ' ' . ($valueIsFunction ? $value : self::prepareBind([$field], true));
         }
@@ -475,14 +497,16 @@ class Model extends Config
     {
         $total = 1;
         $return = array('fields' => "", 'values' => []);
-        foreach ($fields as $item => $value) {
-            if (is_numeric($item)) {
-                $return['fields'] .= $value . ($total < sizeof($fields) ? ',' : '');
-            } else {
-                $return['values'][] = $value;
-                $return['fields'] .= $item . ($total < sizeof($fields) ? ',' : '');
+        for ($i = 0; $i < sizeof($fields); $i++) {
+            foreach ($fields[$i] as $item => $value) {
+                if (is_numeric($item)) {
+                    $return['fields'] .= $value . ($total < sizeof($fields) ? ',' : '');
+                } else {
+                    $return['values'][] = $value;
+                    $return['fields'] .= $item . ($total < sizeof($fields) ? ',' : '');
+                }
+                $total++;
             }
-            $total++;
         }
 
         return $return;
@@ -492,11 +516,13 @@ class Model extends Config
     private static function prepareBind(array $fields, bool $insert = false)
     {
         $return = "";
-        foreach ($fields as $field => $value) {
+        foreach ($fields as $field) {
             if ($insert) {
                 $return .= "?,";
             } else {
-                $return .= $field . "=?,";
+                foreach ($field as $subfield => $value) {
+                    $return .= $subfield . "=?,";
+                }
             }
         }
         $return = substr($return, 0, -1);
