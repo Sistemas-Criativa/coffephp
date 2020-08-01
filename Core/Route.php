@@ -31,7 +31,21 @@ class Route
 		self::saveRoute('GET');
 		return (new static);
 	}
-
+	/**
+	 * Match a method to route
+	 */
+	public final static function Match($route, $controller, array $methods = [])
+	{
+		//define internal vars
+		self::$route = $route;
+		self::$controller = $controller;
+		self::$tokennized = false;
+		//save a Route
+		foreach($methods as $method){
+			self::saveRoute($method);
+		}
+		return (new static);
+	}
 	/**
 	 * Add prefix to route
 	 */
