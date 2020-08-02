@@ -6,6 +6,7 @@ use Core\Filter;
 use Core\Make;
 use Core\Request;
 use Core\HTTP;
+use Config\Config;
 
 class Route
 {
@@ -41,9 +42,7 @@ class Route
 		self::$controller = $controller;
 		self::$tokennized = false;
 		//save a Route
-		foreach($methods as $method){
-			self::saveRoute($method);
-		}
+		self::saveRoute($methods);
 		return (new static);
 	}
 	/**
@@ -60,7 +59,7 @@ class Route
 	 */
 	private final static function saveRoute($method)
 	{
-		array_push((new static)::$routes, array('name' => self::$name, 'route' => self::$route, 'controller' => self::$prefixController . self::$controller, 'method' => strtoupper($method), 'filters' => self::$filters, 'tokennized' => self::$tokennized));
+		array_push((new static)::$routes, array('name' => self::$name, 'route' => self::$route, 'controller' => self::$prefixController . self::$controller, 'method' => (is_array($method) ? $method : strtoupper($method)), 'filters' => self::$filters, 'tokennized' => self::$tokennized));
 		self::$name = "";
 		self::$filters = array();
 	}
@@ -143,6 +142,16 @@ class Route
 	 */
 	private static function verifyMethod($method = "GET")
 	{
+		if (is_array($method)) {
+			$allowed = false;
+			foreach ($method as $item) {
+				if ($_SERVER['REQUEST_METHOD'] != strtoupper($item)) {
+					$allowed = true;
+					break;
+				}
+			}
+			return $allowed;
+		}
 		if ($_SERVER['REQUEST_METHOD'] != strtoupper($method)) {
 			return false;
 		} else {
@@ -166,11 +175,13 @@ class Route
 		$controller = "";
 		$arguments = array();
 		$method = "";
+		$methods = [];
 		$tokennized = false;
 
 		$filter = array();
 		//iterate the Routes
 		for ($j = 0; $j < sizeof(self::$routes); $j++) {
+			$methods = [];
 			$matchs = 0;
 			//get the route args
 			$argsRoute = explode("/", self::$routes[$j]['route']);
@@ -186,6 +197,7 @@ class Route
 							if (self::verifyMethod(self::$routes[$j]['method'])) {
 								$controller = self::$routes[$j]['controller'];
 								$method = self::$routes[$j]['method'];
+								$methods = self::$routes[$j]['method'];
 								$filter = self::$routes[$j]['filters'];
 								$tokennized = self::$routes[$j]['tokennized'];
 								$matchs++;
@@ -199,6 +211,7 @@ class Route
 							//add to args list to a function
 							array_push($arguments, Request::sanitize($args[$i]));
 							$method = self::$routes[$j]['method'];
+							$methods = self::$routes[$j]['method'];
 							$filter = self::$routes[$j]['filters'];
 							$tokennized = self::$routes[$j]['tokennized'];
 							$matchs++;
@@ -226,6 +239,16 @@ class Route
 			//verify if method is allowed
 			self::verifyMethod($method);
 			self::verifyFilters($filter);
+			$allowed = Config::config('allowed-headers');
+			foreach ($allowed as $header) {
+				header($header);
+			}
+			$alloweMethods = '';
+			foreach ($methods as $item) {
+				$alloweMethods .= $item . ',';
+			}
+			header('Access-Control-Request-Method: ' . rtrim($alloweMethods, ','));
+
 			//get the controller and function
 			$controller = explode("@", $controller);
 			if (count($controller) != 2) {
