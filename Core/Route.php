@@ -249,6 +249,9 @@ class Route
 			}
 			header('Access-Control-Request-Method: ' . rtrim($alloweMethods, ','));
 
+			if(Request::method() === 'OPTIONS'){
+				exit;
+			}
 			//get the controller and function
 			$controller = explode("@", $controller);
 			if (count($controller) != 2) {
