@@ -10,6 +10,7 @@ mb_http_output('UTF-8');
  */
 function ErrorHandler($error_level, $error_message, $error_file, $error_line)
 {
+	header('HTTP/1.1 500 Internal Server Error');
 	ob_get_clean();
 	echo '<div style="background: #f1f1f1;padding: 20px;">';
 	echo '<h3 style="margin-left:30px">Ops there a Error</h3>';
@@ -27,6 +28,7 @@ function ErrorHandler($error_level, $error_message, $error_file, $error_line)
  */
 function ExceptionHandler($e)
 {
+	header('HTTP/1.1 500 Internal Server Error');
 	ob_get_clean();
 	echo '<div style="background: #f1f1f1;padding: 20px;">';
 	echo '<h3 style="margin-left:30px">Ops there an exception</h3>';

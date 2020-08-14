@@ -59,7 +59,7 @@ class Route
 	 */
 	private final static function saveRoute($method)
 	{
-		array_push((new static)::$routes, array('name' => self::$name, 'route' => self::$route, 'controller' => self::$prefixController . self::$controller, 'method' => (is_array($method) ? $method : strtoupper($method)), 'filters' => self::$filters, 'tokennized' => self::$tokennized));
+		array_push((new static)::$routes, array('name' => self::$name, 'route' => self::$route, 'controller' => self::$prefixController . self::$controller, 'method' => (is_array($method) ? $method : [strtoupper($method)]), 'filters' => self::$filters, 'tokennized' => self::$tokennized));
 		self::$name = "";
 		self::$filters = array();
 	}
@@ -145,7 +145,7 @@ class Route
 		if (is_array($method)) {
 			$allowed = false;
 			foreach ($method as $item) {
-				if ($_SERVER['REQUEST_METHOD'] != strtoupper($item)) {
+				if ($_SERVER['REQUEST_METHOD'] == strtoupper($item)) {
 					$allowed = true;
 					break;
 				}
@@ -224,7 +224,7 @@ class Route
 				}
 			}
 		}
-
+		
 		if ($match) {
 			if ($tokennized) {
 				if (count(Request::post(['_token'])) > 0) {
@@ -244,6 +244,7 @@ class Route
 				header($header);
 			}
 			$alloweMethods = '';
+			
 			foreach ($methods as $item) {
 				$alloweMethods .= $item . ',';
 			}
