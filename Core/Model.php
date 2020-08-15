@@ -12,6 +12,7 @@ class Model extends Config
     protected $fillables = [];
     protected $hidden = [];
     protected $locked = [];
+    protected $json = [];
     protected static $query;
     protected $key = 'id';
     private static $stm;
@@ -50,7 +51,7 @@ class Model extends Config
             $obj = new $class;
             foreach ($object[$i] as $item => $value) {
                 if (!in_array($item, (new static)->hidden)) {
-                    $obj->$item = $value;
+                    $obj->$item = (in_array($item, (new static)->json) ? json_decode($value) : $value);
                 }
             }
             for ($j = 0; $j < sizeof(self::$object); $j++) {
