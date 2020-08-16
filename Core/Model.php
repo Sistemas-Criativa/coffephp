@@ -181,7 +181,7 @@ class Model extends Config
         for ($i = 0; $i < sizeof(self::$bindParams); $i++) {
             foreach (self::$bindParams[$i] as $field => $value) {
                 $types .= "s";
-                $itens[] = $value;
+                $itens[] = (in_array($field, (new static)->json) ? json_encode($value) : $value);
             }
         }
 
