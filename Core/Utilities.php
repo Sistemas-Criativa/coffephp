@@ -20,4 +20,12 @@ class Utilities
         $token = self::hash(rand(111111, 999999) . " - " . date("Y-m-d-H-i-s"));
         return $token;
     }
+
+    /**
+     * Generate a random string
+     */
+    public final static function generateString($length, $permitted = ''){
+        $permitted_chars = ($permitted != '' ? $permitted : '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ');
+        return substr(str_shuffle($permitted_chars), 0, $length);
+    }
 }
