@@ -35,12 +35,12 @@ class Route
 	/**
 	 * Match a method to route
 	 */
-	public final static function Match($route, $controller, array $methods = [])
+	public final static function Match($route, $controller, array $methods = [], $tokennized = true)
 	{
 		//define internal vars
 		self::$route = $route;
 		self::$controller = $controller;
-		self::$tokennized = false;
+		self::$tokennized = $tokennized;
 		//save a Route
 		self::saveRoute($methods);
 		return (new static);
@@ -226,19 +226,6 @@ class Route
 		}
 		
 		if ($match) {
-			if ($tokennized) {
-				if (count(Request::post(['_token'])) > 0) {
-					if (Request::post(['_token'])['_token'] != Request::session('internal_token')) {
-						throw new \Exception("The route needs a auth Token.", 2);
-					}
-				} else {
-					throw new \Exception("The route needs a auth Token.", 2);
-				}
-			}
-
-			//verify if method is allowed
-			self::verifyMethod($method);
-			self::verifyFilters($filter);
 			$allowed = Config::config('allowed-headers');
 			foreach ($allowed as $header) {
 				header($header);
@@ -253,6 +240,20 @@ class Route
 			if(Request::method() === 'OPTIONS'){
 				exit;
 			}
+
+			if ($tokennized) {
+				if (count(Request::post(['_token'])) > 0) {
+					if (Request::post(['_token'])['_token'] != Request::session('internal_token')) {
+						throw new \Exception("The route needs a Token.", 2);
+					}
+				} else {
+					throw new \Exception("The route needs a Token.", 2);
+				}
+			}
+
+			//verify if method is allowed
+			self::verifyMethod($method);
+			self::verifyFilters($filter);
 			//get the controller and function
 			$controller = explode("@", $controller);
 			if (count($controller) != 2) {

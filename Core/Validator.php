@@ -67,11 +67,11 @@ class Validator
     /**
      * Verify the min quantity for character
      */
-    private static function min($item, $fields, $message, $args)
+    private static function min($item, $fields, $message, $min)
     {
         if (array_key_exists($item, $fields)) {
-            if (strlen($fields[$item]) < $args) {
-                self::$errors[] = (empty($message) ? "The min quantity for '$item' is " . $args : $message);
+            if (strlen($fields[$item]) < $min) {
+                self::$errors[] = (empty($message) ? "The min quantity for '$item' is " . $min : $message);
             }
         }
     }
@@ -156,11 +156,19 @@ class Validator
     /**
      * Verify if is URL
      */
-    private static function url($item, $fields, $message)
+    private static function url($item, $fields, $message, $empty = false)
     {
         if (array_key_exists($item, $fields)) {
-            if (!filter_var($fields[$item], FILTER_VALIDATE_URL)) {
-                self::$errors[] = (empty($message) ? "The field '$item' is not a valid URL" : $message);
+            if($empty === 'true') {
+                if($fields[$item] != '') {
+                    if (!filter_var($fields[$item], FILTER_VALIDATE_URL)) {
+                        self::$errors[] = (empty($message) ? "The field '$item' is not a valid URL" : $message);
+                    }
+                }
+            } else {
+                if (!filter_var($fields[$item], FILTER_VALIDATE_URL)) {
+                    self::$errors[] = (empty($message) ? "The field '$item' is not a valid URL" : $message);
+                }
             }
         }
     }

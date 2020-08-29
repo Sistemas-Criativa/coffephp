@@ -3,7 +3,7 @@
 namespace Core;
 
 use Config\Config;
-
+use Core\Converters;
 class Model extends Config
 {
     //define the properties
@@ -12,7 +12,7 @@ class Model extends Config
     protected $fillables = [];
     protected $hidden = [];
     protected $locked = [];
-    protected $json = [];
+    protected $converters = [];
     protected static $query;
     protected $key = 'id';
     private static $stm;
@@ -43,6 +43,7 @@ class Model extends Config
     {
         return (new static)->hidden;
     }
+    
     private static function MakeQueryObject($object)
     {
         $class = static::class;
@@ -51,7 +52,16 @@ class Model extends Config
             $obj = new $class;
             foreach ($object[$i] as $item => $value) {
                 if (!in_array($item, (new static)->hidden)) {
-                    $obj->$item = (in_array($item, (new static)->json) ? json_decode($value) : $value);
+                    if(array_key_exists($item, (new static)->converters)) {
+                        $converter = strtolower((new static)->converters[$item]);
+                        if(method_exists((new Converters), $converter)) {
+                            $obj->$item = Converters::$converter($value, false);
+                        } else {
+                            $obj->$item = $value;
+                        }
+                    } else {
+                        $obj->$item = $value;
+                    }
                 }
             }
             for ($j = 0; $j < sizeof(self::$object); $j++) {
@@ -181,7 +191,16 @@ class Model extends Config
         for ($i = 0; $i < sizeof(self::$bindParams); $i++) {
             foreach (self::$bindParams[$i] as $field => $value) {
                 $types .= "s";
-                $itens[] = (in_array($field, (new static)->json) ? json_encode($value) : $value);
+                if(array_key_exists($field, (new static)->converters)) {
+                    $converter = strtolower((new static)->converters[$field]);
+                    if(method_exists((new Converters), $converter)) {
+                        $itens[] = Converters::$converter($value, true);
+                    } else {
+                        $itens[] = $value;
+                    }
+                } else {
+                    $itens[] = $value;
+                }
             }
         }
 

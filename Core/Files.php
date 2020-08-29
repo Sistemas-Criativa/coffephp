@@ -15,9 +15,12 @@ class Files
     /**
      * Return all files
      */
-    public final static function has($file)
+    public final static function has($file, array $allowedExtensions = [])
     {
         if (isset($_FILES[$file])) {
+            if (count($allowedExtensions) > 0) {
+                return in_array(strtolower(self::getExt($_FILES[$file]['name'])), $allowedExtensions);
+            }
             return true;
         }
         return false;
@@ -52,11 +55,16 @@ class Files
     {
         if (self::has($file)) {
             $file = self::getUploadedFile($file);
-            $path = ($location ? $location : PUBLIC_DIR);
+            $path = ($location ? PUBLIC_DIR . DIRECTORY_SEPARATOR . $location : PUBLIC_DIR);
             $filename = ($randomFileName ? Utilities::generateString(($randomFileNameLength > 0 ? $randomFileNameLength : 50)) . date('YmdHis') : ($filename != '' ? $filename : $file['name'])) . '.' . $file['ext'];
+            if(!file_exists($path)) {
+                mkdir($path);
+                $blankFile = fopen($path . DIRECTORY_SEPARATOR . "index.html", "w");
+                fclose($blankFile);
+            }
             $path = $path . DIRECTORY_SEPARATOR . $filename;
-            if(move_uploaded_file($file["tmp_name"], $path)) {
-                return $path;
+            if (move_uploaded_file($file["tmp_name"], $path)) {
+                return ["complete" => $path, "relative" => ($location ? $location . DIRECTORY_SEPARATOR . $filename : $filename), "url" => route()['root'] . "/" .str_replace("\\", "/", ($location ? $location . DIRECTORY_SEPARATOR . $filename : $filename))];
             }
             return false;
         }
