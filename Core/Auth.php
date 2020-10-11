@@ -6,9 +6,12 @@ use Models\User;
 use Core\Request;
 use Core\Utilities;
 use Models\Session;
+use Config\Config;
 
 class Auth extends Request
 {
+    private static $user;
+    public static $error_type;
     /**
      * Authenticate the user
      */
@@ -21,7 +24,8 @@ class Auth extends Request
         if ($validator->errors() !=  false) {
             return $validator->errors();
         }
-        $user = User::where('Active', '=', '1')
+        $user = User::select()
+            ->where('Active', '=', '1')
             ->and('User', '=', Utilities::hash(Request::post()['Email']))
             ->and('Password', '=', Utilities::hash(Request::post()['Password']))
             ->limit(1)
@@ -29,6 +33,8 @@ class Auth extends Request
         if (count($user) > 0) {
             $session = Session::create(["id_User" => $user[0]->id, "Token" => Utilities::token(), "Status" => 1]);
             Request::saveDataSession('user', $session);
+            $user[0]->Token = $session->Token;
+            self::$user = $user[0];
             return true;
         } else {
             $validator->addError('Usuário ou senha incorretos.');
@@ -48,7 +54,8 @@ class Auth extends Request
         if ($validator->errors() !=  false) {
             return $validator->errors();
         }
-        $user = User::Where('User', '=', Utilities::hash(Request::post()['Email']))
+        $user = User::select()
+            ->Where('User', '=', Utilities::hash(Request::post()['Email']))
             ->and('Password', '=', Utilities::hash(Request::post()['Password']))
             ->limit(1)
             ->execute();
@@ -60,6 +67,8 @@ class Auth extends Request
             $user = User::create($data);
             $session = Session::create(["id_User" => $user->id, "Token" => Utilities::token(), "Status" => 1]);
             Request::saveDataSession('user', $session);
+            $user[0]->Token = $session->Token;
+            self::$user = $user[0];
             return true;
         } else {
             $validator->addError('Usuário já cadastrado.');
@@ -67,14 +76,21 @@ class Auth extends Request
         }
     }
 
-    /** verify if is logged */
+    /** return the user */
     public final static function user()
+    {
+        self::authFilter();
+        return self::$user;
+    }
+
+    /** verify if is logged */
+    public final static function authFilter()
     {
         $session = Request::session('user');
         if ($session === false || !isset($session->Token)) {
             return false;
         } else {
-            $logged = User::selectCount("id", "LOGGED")
+            $logged = User::select()
                 ->where()
                 ->in("id")
                 ->select(['id_User'], Session::tableName())
@@ -85,12 +101,13 @@ class Auth extends Request
             if (!$logged) {
                 return false;
             } else {
-                if ($logged[0]->LOGGED == 1) {
-                    return $session;
-                } else {
+                if (count($logged) == 0) {
                     Request::clearDataSession('user');
                     return false;
                 }
+                $logged[0]->Token = $session->Token;
+                self::$user = $logged[0];
+                return $session;
             }
         }
     }
@@ -106,5 +123,48 @@ class Auth extends Request
                 ->execute();
         }
         Request::clearDataSession('user');
+    }
+
+    /** 
+     * extract a autho token from header
+    */
+    private final static function extractAuthorizationToken($value){
+        return trim(strstr($value, " "));
+    }
+     /**
+     * Authenticate the user
+     */
+    public final static function token()
+    {
+        //create a validation rule for login
+        $validator = Validator::validate(Request::headers(), [
+            'Authorization' => ['required:O token de autorização é obrigatório'],
+        ]);
+
+        //verify if has errors
+        if ($validator->errors() !=  false) {
+            self::$error_type = 400;
+            return $validator->errors();
+        }
+
+        $user = User::where('Active', '=', '1')
+            ->and()
+            ->where()
+            ->in('id')
+            ->select(['id_User'], Session::tableName())
+            ->where('Token', '=', self::extractAuthorizationToken(Request::headers()['Authorization']))
+            ->and('Status', '=', 1)
+            ->endin()
+            ->limit(1)
+            ->execute();
+        if (count($user) > 0) {
+            self::$user = $user[0];
+            self::$user->Token = self::extractAuthorizationToken(Request::headers()['Authorization']);
+            return true;
+        } else {
+            $validator->addError('Token inválido.');
+            self::$error_type = 400;
+            return $validator->errors();
+        }
     }
 }

@@ -88,6 +88,23 @@ class Request
     }
 
     /**
+     * get all or a specific header
+     */
+    public final static function headers(array $itens = array()){
+        $allHeaders = getallheaders();
+        if(count($itens) > 0) {
+            $temp = [];
+            foreach($itens as $item){
+                if(array_key_exists($item, $allHeaders)){
+                    $temp[] = $allHeaders[$item];
+                }
+            }
+            return $temp;
+        } else {
+            return $allHeaders;
+        }
+    }
+    /**
      * Return all or a specific item of post
      */
     public final static function post(array $itens = array())

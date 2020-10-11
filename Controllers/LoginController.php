@@ -24,10 +24,23 @@ class LoginController extends Controllers
     public function login()
     {
         $auth = Auth::auth();
-        if (Auth::auth() !== true) {
+        if ($auth !== true) {
             redirect()->route('show.login', ['errors' => $auth]);
         } else {
             redirect()->route('dashboard');
+        }
+    }
+
+    /**
+     * Do the login
+     */
+    public function loginAPI()
+    {
+        $auth = Auth::auth();
+        if ($auth !== true) {
+            response(['success' => false, 'errors' => ['errors' => $auth]], 401);
+        } else {
+            response(['success' => true, 'user' => Auth::user()], 200);
         }
     }
 

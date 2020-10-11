@@ -15,4 +15,12 @@ class IndexController extends Controllers
     {
         view("master.view", ["title" => TITLE, 'include' => 'index.view', 'user' => Auth::user()]);
     }
+
+    /**
+     * Show the data from a protected route
+     */
+    function showAPI()
+    {
+        response(['success' => true, 'page' => 'dashboard']);
+    }
 }
